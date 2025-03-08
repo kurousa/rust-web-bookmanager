@@ -1,19 +1,15 @@
 FROM rust:1.84-slim-bookworm AS builder
 WORKDIR /app
-
-ARG DATABASE_URL
-ENV DATABASE_URL=${DATABASE_URL}
-
 COPY . .
 RUN cargo build --release
 
 FROM debian:bookworm-slim
 WORKDIR /app
+
 RUN adduser book && chown -R book /app
 USER book
-ARG APP_NAME=rust-web-bookmanager
-COPY --from=builder ./app/target/release/${APP_NAME} ./target/release/${APP_NAME}
+COPY --from=builder ./app/target/release/app ./target/release/app
 
 ENV PORT=8080
-EXPOSE $PORT
-ENTRYPOINT ["./target/release/${APP_NAME}"]
+EXPOSE ${PORT}
+ENTRYPOINT [ "./target/release/app" ]
