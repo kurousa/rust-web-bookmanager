@@ -1,5 +1,5 @@
 [package]
-name = "rusty-book-manager"
+name = "rust-web-bookmanager"
 version = "0.1.0"
 edition = "2021"
 
