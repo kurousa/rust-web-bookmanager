@@ -1,0 +1,60 @@
+name: push image to ECR
+on:
+  push:
+    tags:
+      - "release-*"
+
+permissions:
+  id-token: write
+  issues: write
+  pull-requests: write
+  contents: read
+
+env:
+  AWS_PROFILE_NAME: aws-handson
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/github-actions-oidc
+          aws-region: ap-northeast-1
+
+      - name: Make aws profile
+        run: |
+          aws configure set aws_access_key_id ${AWS_ACCESS_KEY_ID} --profile ${{ env.AWS_PROFILE_NAME }}
+          aws configure set aws_secret_access_key ${AWS_SECRET_ACCESS_KEY} --profile ${{ env.AWS_PROFILE_NAME }}
+          aws configure set aws_session_token ${AWS_SESSION_TOKEN} --profile ${{ env.AWS_PROFILE_NAME }}
+
+      - run: aws sts get-caller-identity --profile ${{ env.AWS_PROFILE_NAME }}
+
+      - uses: aws-actions/amazon-ecr-login@v1
+        id: login-ecr
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/github-actions-oidc
+          aws-region: ap-northeast-1
+
+      - name: Install cargo-make
+        uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-make
+
+      - name: Push an image for backend to ECR
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          REPOSITORY: "book-manager-backend"
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          cargo make ecr-build
+          docker tag example-app-app ${{ env.REGISTRY }}/${{ env.REPOSITORY }}:${{ env.IMAGE_TAG }}
+          docker push ${{ env.REGISTRY }}/${{ env.REPOSITORY }}:${{ env.IMAGE_TAG }}
+          docker tag example-app-app ${{ env.REGISTRY }}/${{ env.REPOSITORY }}:latest
+          docker push ${{ env.REGISTRY }}/${{ env.REPOSITORY }}:latest
