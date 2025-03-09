@@ -24,6 +24,9 @@ REDIS_HOST = "redis"
 REDIS_PORT = "${REDIS_PORT_INNER}"
 JAEGER_HOST = "jaeger"
 JAEGER_PORT = 6831
+BACKEND_HOST = "backend"
+BACKEND_PORT = 8080
+FRONTEND_PORT = 3000
 
 # Docker Compose外からDB等にアクセスする際の接続情報
 [tasks.set-env-local.env]
@@ -34,6 +37,9 @@ REDIS_HOST = "localhost"
 REDIS_PORT = "${REDIS_PORT_OUTER}"
 JAEGER_HOST = "localhost"
 JAEGER_PORT = 6831
+BACKEND_HOST = "localhost"
+BACKEND_PORT = 8080
+FRONTEND_PORT = 3000
 
 # runの前に依存関係のあるサービスを起動
 [tasks.before-build]
@@ -45,11 +51,19 @@ run_task = [
 ]
 
 # run-in-docker実行用のコンテナビルド
-[tasks.compose-build-app]
+[tasks.compose-build-frontend]
 extend = "set-env-local"
 command = "docker"
 args = [
-  "compose", "build", "app",
+  "compose", "build", "frontend",
+  "--build-arg", "BUILDKIT_INLINE_CACHE=1", "${@}"
+]
+
+[tasks.compose-build-backend]
+extend = "set-env-local"
+command = "docker"
+args = [
+  "compose", "build", "backend",
   "--build-arg", "BUILDKIT_INLINE_CACHE=1", "${@}"
 ]
 
@@ -63,11 +77,17 @@ args = ["run", "${@}"]
 
 # cargo make run-in-docker用
 # Docker上でRustプログラムを実行
-[tasks.run-in-docker]
+[tasks.backend-run-in-docker]
 extend = "set-env-docker"
-dependencies = ["before-build", "compose-build-app"]
+dependencies = ["before-build", "compose-build-backend"]
 command = "docker"
-args = ["compose", "up", "-d", "app"]
+args = ["compose", "up", "-d", "backend"]
+
+[tasks.frontend-run-in-docker]
+extend = "set-env-docker"
+dependencies = ["before-build", "compose-build-frontend"]
+command = "docker"
+args = ["compose", "up", "-d", "frontend"]
 
 ### Development
 
@@ -202,10 +222,15 @@ extend = "set-env-docker"
 command = "docker"
 args = ["compose", "${@}"]
 
+# docker compose ps表示用
+[tasks.compose-ps]
+extend = "set-env-docker"
+command = "docker"
+args = ["compose", "ps"]
+
 # docker compose logs表示用
 [tasks.compose-logs]
 extend = "set-env-docker"
-dependencies = ["before-build"]
 command = "docker"
 args = ["compose", "logs", "${@}"]
 
