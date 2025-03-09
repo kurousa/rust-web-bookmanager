@@ -10,8 +10,7 @@ async fn handler_health() -> StatusCode {
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    let app = Router::new()
-        .route("/health", get(handler_health))
+    let app = Router::new().route("/health", get(handler_health));
     let addr = SocketAddr::new(Ipv4Addr::LOCALHOST.into(), 8080);
     let listener = TcpListener::bind(addr).await?;
     println!("Listening on {}", addr);
