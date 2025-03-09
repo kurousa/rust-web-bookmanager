@@ -1,5 +1,17 @@
 services:
-  app:
+
+  frontend:
+    build:
+      context: frontend
+      dockerfile: Dockerfile
+      args:
+        BACKEND_HOST: ${BACKEND_HOST}
+        BACKEND_PORT: ${BACKEND_PORT}
+      network: host
+    ports:
+      - ${FRONTEND_PORT}:3000
+
+  backend:
     build:
       context: .
       dockerfile: Dockerfile
