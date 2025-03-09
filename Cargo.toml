@@ -8,6 +8,7 @@ name = "app"
 path = "src/main.rs"
 
 [dependencies]
+anyhow = { version = "1.0.75", features = ["backtrace"] }
 axum = { version = "0.7.5", features = ["macros"] }
 tokio = { version = "1.37.0", features = ["full"] }
 
