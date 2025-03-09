@@ -17,3 +17,9 @@ async fn main() -> Result<()> {
 
     Ok(axum::serve(listener, app).await?)
 }
+
+#[tokio::test]
+async fn test_handler_health() {
+    let status_code = handler_health().await;
+    assert_eq!(status_code, StatusCode::OK);
+}
