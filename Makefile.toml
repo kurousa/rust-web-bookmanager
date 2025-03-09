@@ -71,7 +71,6 @@ args = [
 # ローカル上でRustプログラムを実行
 [tasks.run]
 extend = "set-env-local"
-dependencies = ["before-build"]
 command = "cargo"
 args = ["run", "${@}"]
 
@@ -94,16 +93,14 @@ args = ["compose", "up", "-d", "frontend"]
 # ワークスペース内のファイル保存時に自動で実行するタスクを定義
 [tasks.watch]
 extend = "set-env-local"
-dependencies = ["before-build"]
 run_task = [
-    { name = ["fmt", "clippy", "test"] }
+    { name = ["check", "fmt", "clippy", "test", "run"] }
 ]
 watch = true
 
 # cargo check
 [tasks.check]
 extend = "set-env-local"
-dependencies = ["before-build"]
 command = "cargo"
 args = ["check"]
 
