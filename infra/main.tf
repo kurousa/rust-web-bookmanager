@@ -5,7 +5,7 @@ variable "aws_region" {
 
 variable "aws_profile" {
   type    = string
-  default = "oxidized-crab"
+  default = "aws-handson"
 }
 
 terraform {
@@ -21,14 +21,13 @@ terraform {
   backend "s3" {
     # この「bucket」部分はご自身のS3バケット名を必ず命名してください。
     # S3バケット名はAWSグローバルで一意でなければなりません。
-    bucket = "<your-tf-state-bucket>"
+    bucket = "terraform-state-20250309"
     region  = "ap-northeast-1"
-    profile = "oxidized-crab"
+    profile = "aws-handson"
     key     = "bookmanager.tfstate"
     encrypt = true
   }
 }
-
 provider "aws" {
   region  = var.aws_region
   profile = var.aws_profile
