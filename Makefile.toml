@@ -67,6 +67,15 @@ args = [
   "--build-arg", "BUILDKIT_INLINE_CACHE=1", "${@}"
 ]
 
+# Github Actions ECR build
+[tasks.ecr-build]
+extend = "set-env-local"
+command = "docker"
+args = [
+  "compose", "build", "backend",
+  "--build-arg", "BUILDKIT_INLINE_CACHE=1", "${@}"
+]
+
 # cargo make run用
 # ローカル上でRustプログラムを実行
 [tasks.run]
