@@ -1,60 +1,38 @@
 use std::net::{Ipv4Addr, SocketAddr};
 
-use anyhow::Result;
+use adapter::database::connect_database_with;
+use anyhow::{Error, Result};
+use api::route::health::build_health_check_routers;
 use axum::Router;
+use registry::AppRegistry;
+use shared::config::AppConfig;
 use tokio::net::TcpListener;
-
-// sharedに移動した
-// struct DatabaseConfig {
-//     pub host: String,
-//     pub port: u16,
-//     pub username: String,
-//     pub password: String,
-//     pub database: String,
-// }
-// impl From<DatabaseConfig> for PgConnectOptions {
-//     fn from(cfg: DatabaseConfig) -> Self {
-//         Self::new()
-//             .host(&cfg.host)
-//             .port(cfg.port)
-//             .username(&cfg.username)
-//             .password(&cfg.password)
-//             .database(&cfg.database)
-//     }
-// }
-
-// adapterに移動した
-// fn connect_database_with(cfg: DatabaseConfig) -> PgPool {
-//     PgPool::connect_lazy_with(cfg.into())
-// }
-
-// apiに移動した
-// async fn handler_health() -> StatusCode {
-//     StatusCode::OK
-// }
-
-// async fn handler_health_check_db(State(db): State<PgPool>) -> StatusCode {
-//     let connection_result = sqlx::query("SELECT 1").fetch_one(&db).await;
-//     match connection_result {
-//         Ok(_) => StatusCode::OK,
-//         Err(_) => StatusCode::INTERNAL_SERVER_ERROR,
-//     }
-// }
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    // TODO: app_conigの初期化
+    bootstrap().await
+}
 
-    // TODO: adapterの初期化
+async fn bootstrap() -> Result<()> {
+    // app_conigの初期化
+    let app_config = AppConfig::new()?;
+    // データベース接続処理
+    let pool = connect_database_with(&app_config.database);
+    // registryの初期化
+    let registry = AppRegistry::new(pool);
 
-    // TODO: registryからの取得を行う
+    // ルーターの初期化、AppRegistryをRouterに登録
+    let app = Router::new()
+        .merge(build_health_check_routers())
+        .with_state(registry);
 
-    let app = Router::new();
+    // サーバーの起動
     let addr = SocketAddr::new(Ipv4Addr::LOCALHOST.into(), 8080);
     let listener = TcpListener::bind(addr).await?;
+
     println!("Listening on {}", addr);
 
-    Ok(axum::serve(listener, app).await?)
+    axum::serve(listener, app).await.map_err(Error::from)
 }
 
 // #[tokio::test]
