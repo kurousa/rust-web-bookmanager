@@ -10,4 +10,3 @@
   - `kernel`レイヤーで定義したインターフェイスの具象実装
 - ミドルウェアへのアクセス(database, redis)
   - PostgresSQL,Redisへのアクセスに関する処理
-
