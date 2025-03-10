@@ -72,8 +72,9 @@ args = [
 extend = "set-env-local"
 command = "docker"
 args = [
-  "compose", "build", "backend",
-  "--build-arg", "BUILDKIT_INLINE_CACHE=1", "${@}"
+  "build", "-t", "backend:latest",
+  "--build-arg", "BUILDKIT_INLINE_CACHE=1",
+  "."
 ]
 
 # cargo make run用
