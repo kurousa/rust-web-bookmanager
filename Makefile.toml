@@ -42,6 +42,15 @@ BACKEND_PORT = 8080
 FRONTEND_PORT = 3000
 
 # runの前に依存関係のあるサービスを起動
+[tasks.before-build-ci]
+run_task = [
+    { name = [
+        "compose-up-db",
+        "migrate-on-ci",
+        "compose-up-redis",
+    ] },
+]
+
 [tasks.before-build]
 run_task = [
     { name = [
@@ -172,12 +181,21 @@ args = [
 
 # CIからのtest呼び出し用
 [tasks.test-ci]
-dependencies = ["before-build"]
+dependencies = ["before-build-ci"]
 run_task = "test"
 
 ### Migration
 
 # sqlx-cliをインストールし、マイグレーションを実行
+[tasks.migrate-on-ci]
+extend = "set-env-local"
+install_crate = { crate_name = "sqlx-cli", binary = "sqlx", test_arg = "--help", version = "0.7.3" }
+script = '''
+#!/bin/bash
+until sqlx migrate run --source adapter/migrations; do
+    sleep 1
+done
+
 [tasks.migrate-on-ps]
 extend = "set-env-local"
 install_crate = { crate_name = "sqlx-cli", binary = "sqlx", test_arg = "--help", version = "0.7.3" }
