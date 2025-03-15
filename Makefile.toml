@@ -81,6 +81,7 @@ args = [
 # ローカル上でRustプログラムを実行
 [tasks.run]
 extend = "set-env-local"
+dependencies = ["before-build"]
 command = "cargo"
 args = ["run", "${@}"]
 
