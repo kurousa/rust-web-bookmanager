@@ -46,6 +46,7 @@ FRONTEND_PORT = 3000
 run_task = [
     { name = [
         "compose-up-db",
+        "migrate-on-ps",
         "compose-up-redis",
     ] },
 ]
@@ -177,15 +178,15 @@ run_task = "test"
 ### Migration
 
 # sqlx-cliをインストールし、マイグレーションを実行
-[tasks.migrate]
+[tasks.migrate-on-ps]
 extend = "set-env-local"
 install_crate = { crate_name = "sqlx-cli", binary = "sqlx", test_arg = "--help", version = "0.7.3" }
-script = '''
-#!/bin/bash
-until sqlx migrate run --source adapter/migrations; do
-    sleep 1
-done
-'''
+command = "powershell"
+args = [
+  "-ExecutionPolicy","Bypass",
+  "./migrate.ps1"
+]
+
 
 [tasks.sqlx]
 extend = "set-env-local"
@@ -202,7 +203,7 @@ args = [
   "-it",
   "--rm",
   "--network", "host",
-  "-v", "${PWD}:/work",
+  "-v", ".:/work",
   "postgres:15",
   "psql", "${DATABASE_URL}", "${@}"
 ]
@@ -257,7 +258,8 @@ extend = "set-env-docker"
 command = "docker"
 args = ["compose", "down"]
 
-[tasks.compose-down-with-volume]
+# Docker Composeに関する全てを破棄
+[tasks.compose-remove]
 extend = "set-env-docker"
 command = "docker"
 args = ["compose", "down", "-v"]
