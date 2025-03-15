@@ -195,6 +195,7 @@ script = '''
 until sqlx migrate run --source adapter/migrations; do
     sleep 1
 done
+'''
 
 [tasks.migrate-on-ps]
 extend = "set-env-local"
