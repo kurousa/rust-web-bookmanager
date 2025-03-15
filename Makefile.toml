@@ -168,7 +168,7 @@ args = [
 # CIからのclippy呼び出し用
 [tasks.clippy-ci]
 extend = "set-env-local"
-dependencies = ["before-build"]
+dependencies = ["before-build-ci"]
 command = "cargo"
 args = [
     "clippy",
