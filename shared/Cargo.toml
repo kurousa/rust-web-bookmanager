@@ -3,5 +3,9 @@ name = "shared"
 version = "0.1.0"
 edition = "2021"
 
+[lib]
+name = "shared"
+path = "src/lib.rs"
+
 [dependencies]
 anyhow.workspace = true
