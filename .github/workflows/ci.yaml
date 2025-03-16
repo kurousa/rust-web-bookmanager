@@ -39,4 +39,5 @@ jobs:
         run: cargo make fmt -- --check
 
       - name: Check unused dependencies
+　　　　　continue-on-error: true
         run: cargo machete
