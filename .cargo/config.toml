@@ -1,0 +1,3 @@
+[env]
+# sqlx::query!などでの静的SQLクエリチェックの際に環境変数としてDATABASE_URLが参照されるため
+DATABASE_URL = "postgres://app:passwd@localhost:5432/app"
