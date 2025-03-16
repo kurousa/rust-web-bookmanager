@@ -86,8 +86,14 @@ dependencies = [
 name = "api"
 version = "0.1.0"
 dependencies = [
+ "anyhow",
  "axum",
+ "derive-new",
+ "kernel",
  "registry",
+ "serde",
+ "thiserror",
+ "uuid",
 ]
 
 [[package]]
