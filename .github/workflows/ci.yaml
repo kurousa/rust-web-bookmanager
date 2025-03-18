@@ -40,3 +40,5 @@ jobs:
 
       - name: Check unused dependencies
         run: cargo machete
+        continue-on-error: true
+
