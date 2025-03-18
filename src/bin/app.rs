@@ -88,15 +88,3 @@ async fn bootstrap() -> Result<()> {
             )
         })
 }
-
-// #[tokio::test]
-// async fn test_handler_health() {
-//     let status_code = handler_health().await;
-//     assert_eq!(status_code, StatusCode::OK);
-// }
-
-// #[sqlx::test]
-// async fn test_handler_health_check_db(pool: sqlx::PgPool) {
-//     let status_code = handler_health_check_db(State(pool)).await;
-//     assert_eq!(status_code, StatusCode::OK);
-// }
