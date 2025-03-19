@@ -28,7 +28,7 @@ jobs:
             target/
           key: autofix-${{ hashFiles('**/Cargo.lock') }}
       - run: |
-          rustup toolchain install ${{ env.rust_clippy }} --profile minimal --component rustfmt 1--component clippy
+          rustup toolchain install ${{ env.rust_clippy }} --profile minimal --component rustfmt --component clippy
       - run: rustup default ${{ env.rust_clippy }}
 
       - run: cargo clippy --fix --workspace
