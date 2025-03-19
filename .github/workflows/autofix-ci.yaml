@@ -11,7 +11,7 @@ permissions:
   contents: read
 
 env:
-  rust_clippy: 1.65  # MSRV
+  rust_clippy: 1.84  # MSRV
 
 jobs:
   autofix:
@@ -28,10 +28,7 @@ jobs:
             target/
           key: autofix-${{ hashFiles('**/Cargo.lock') }}
       - run: |
-          rustup toolchain install ${{ env.rust_clippy }}
-          --profile minimal
-          --component rustfmt
-          --component clippy
+          rustup toolchain install ${{ env.rust_clippy }} --profile minimal --component rustfmt 1--component clippy
       - run: rustup default ${{ env.rust_clippy }}
 
       - run: cargo clippy --fix --workspace
