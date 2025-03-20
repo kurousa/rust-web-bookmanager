@@ -114,6 +114,7 @@ args = ["compose", "up", "-d", "frontend"]
 # ワークスペース内のファイル保存時に自動で実行するタスクを定義
 [tasks.watch]
 extend = "set-env-local"
+dependencies = ["before-build"]
 run_task = [
     { name = ["check", "fmt", "clippy", "test", "run"] }
 ]
