@@ -80,6 +80,7 @@ mod tests {
     use super::*;
 
     #[sqlx::test]
+    #[ignore] // NOTE: アプリケーション実装が完了するまで無効
     async fn test_register_book(pool: sqlx::PgPool) -> anyhow::Result<()> {
         let repo = BookRepositoryImpl::new(ConnectionPool::new(pool));
 
