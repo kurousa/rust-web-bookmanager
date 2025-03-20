@@ -254,10 +254,10 @@ args = [
   "-it",
   "--rm",
   "--network", "host",
-  "-v", "${PWD}:/work",
+  "-v", ".:/work",
   "postgres:15",
   "psql", "${DATABASE_URL}",
-  "-f", "/work/data/initial_setup.sql"
+  "-f", "/work/adapter/seeds/initial_setup.sql"
 ]
 
 ### Docker Compose
