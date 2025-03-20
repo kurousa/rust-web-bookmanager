@@ -5,10 +5,10 @@ use axum::{
     response::{IntoResponse, Response},
     Json,
 };
+use kernel::model::id::BookId;
 use registry::AppRegistry;
-use shared::error::AppResult;
-use thiserror::Error;
-use uuid::Uuid;
+use shared::error::{AppError, AppResult};
+// use thiserror::Error;
 
 /// 蔵書登録
 pub async fn register_book(
@@ -35,7 +35,7 @@ pub async fn show_book_list(
 }
 /// ID指定像取得
 pub async fn show_book(
-    Path(book_id): Path<Uuid>,
+    Path(book_id): Path<BookId>,
     State(registry): State<AppRegistry>,
 ) -> AppResult<Json<BookResponse>, AppError> {
     registry
