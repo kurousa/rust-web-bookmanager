@@ -1,13 +1,14 @@
 use std::net::{Ipv4Addr, SocketAddr};
 
 use adapter::database::connect_database_with;
-use anyhow::{Context, Error, Result};
+use anyhow::{Context, Result};
 use api::route::{book::build_book_routers, health::build_health_check_routers};
+use axum::http::Method;
 use axum::Router;
 use registry::AppRegistry;
 use shared::config::AppConfig;
 use tokio::net::TcpListener;
-use tower_http::cors;
+use tower_http::cors::{Any, CorsLayer};
 use tower_http::trace::{DefaultMakeSpan, DefaultOnRequest, DefaultOnResponse, TraceLayer};
 use tower_http::LatencyUnit;
 use tracing::Level;
@@ -54,6 +55,11 @@ async fn bootstrap() -> Result<()> {
     let pool = connect_database_with(&app_config.database);
     // registryの初期化
     let registry = AppRegistry::new(pool);
+    let cors = CorsLayer::new()
+        // allow `GET` and `POST` when accessing the resource
+        .allow_methods([Method::GET, Method::POST])
+        // allow requests from any origin
+        .allow_origin(Any);
 
     // ルーターの初期化、AppRegistryをRouterに登録
     let app = Router::new()
@@ -62,13 +68,16 @@ async fn bootstrap() -> Result<()> {
         // TODO: implement
         //.merge(vi::routes())
         //.merge(auth::routes())
-        .layer(cors())
+        .layer(cors)
         .layer(
             TraceLayer::new_for_http()
                 .make_span_with(DefaultMakeSpan::new().level(Level::INFO))
                 .on_request(DefaultOnRequest::new().level(Level::INFO))
-                .on_response(DefaultOnResponse::new().level(Level::INFO))
-                .latency_unit(LatencyUnit::Millis),
+                .on_response(
+                    DefaultOnResponse::new()
+                        .level(Level::INFO)
+                        .latency_unit(LatencyUnit::Millis),
+                ),
         )
         .with_state(registry);
 
