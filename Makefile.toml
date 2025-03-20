@@ -185,6 +185,23 @@ args = [
 dependencies = ["before-build-ci"]
 run_task = "test"
 
+[tasks.create-hash]
+script_runner = "@rust"
+args = ["--password", "{password}"]
+script = '''
+//! ```cargo
+//! [dependencies]
+//! bcrypt = "0.15.1"
+//! ```
+use std::env;
+
+fn main() {
+    let args: Vec<String> = env::args().collect();
+    let password = &args[1];
+    let hashed = bcrypt::hash(password, bcrypt::DEFAULT_COST).unwrap();
+    println!("{}", hashed);
+}
+'''
 ### Migration
 
 # sqlx-cliをインストールし、マイグレーションを実行
