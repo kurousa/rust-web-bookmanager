@@ -1,8 +1,11 @@
-use std::net::{Ipv4Addr, SocketAddr};
+use std::{
+    net::{Ipv4Addr, SocketAddr},
+    sync::Arc,
+};
 
-use adapter::database::connect_database_with;
+use adapter::{database::connect_database_with, redis::RedisClient};
 use anyhow::{Context, Result};
-use api::route::{book::build_book_routers, health::build_health_check_routers};
+use api::route::{auth, book::build_book_routers, health::build_health_check_routers};
 use axum::http::Method;
 use axum::Router;
 use registry::AppRegistry;
@@ -53,8 +56,10 @@ async fn bootstrap() -> Result<()> {
     let app_config = AppConfig::new()?;
     // データベース接続処理
     let pool = connect_database_with(&app_config.database);
+    // Redis接続処理
+    let kv = Arc::new(RedisClient::new(&app_config.redis)?);
     // registryの初期化
-    let registry = AppRegistry::new(pool);
+    let registry = AppRegistry::new(pool, kv, app_config);
     let cors = CorsLayer::new()
         // allow `GET` and `POST` when accessing the resource
         .allow_methods([Method::GET, Method::POST])
@@ -65,9 +70,9 @@ async fn bootstrap() -> Result<()> {
     let app = Router::new()
         .merge(build_health_check_routers())
         .merge(build_book_routers())
+        .merge(auth::routes())
         // TODO: implement
         //.merge(vi::routes())
-        //.merge(auth::routes())
         .layer(cors)
         .layer(
             TraceLayer::new_for_http()
