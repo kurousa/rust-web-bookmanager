@@ -3,7 +3,10 @@ use kernel::model::auth::event::CreateToken;
 use registry::AppRegistry;
 use shared::error::AppResult;
 
-use crate::model::auth::{AccessTokenResponse, LoginRequest};
+use crate::{
+    extractor::AuthorizedUser,
+    model::auth::{AccessTokenResponse, LoginRequest},
+};
 
 /// ログイン処理
 /// ユーザーの認証を行い、アクセストークンを発行する
