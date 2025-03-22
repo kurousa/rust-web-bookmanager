@@ -18,5 +18,5 @@ pub trait AuthRepository: Send + Sync {
     /// アクセストークンの作成
     async fn create_token(&self, event: CreateToken) -> AppResult<AccessToken>;
     /// アクセストークンの削除
-    async fn delete_token(&self, access_token: &AccessToken) -> AppResult<()>;
+    async fn delete_token(&self, access_token: AccessToken) -> AppResult<()>;
 }

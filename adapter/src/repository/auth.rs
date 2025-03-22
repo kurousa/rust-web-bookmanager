@@ -66,7 +66,7 @@ impl AuthRepository for AuthRepositoryImpl {
         Ok(key.into())
     }
 
-    async fn delete_token(&self, access_token: &AccessToken) -> AppResult<()> {
+    async fn delete_token(&self, access_token: AccessToken) -> AppResult<()> {
         let key: AuthorizationKey = access_token.into();
         self.kv.delete(&key).await
     }
