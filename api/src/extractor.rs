@@ -47,7 +47,7 @@ impl FromRequestParts<AppRegistry> for AuthorizedUser {
         // ユーザーIDからユーザー情報を取得
         let user = registry
             .user_repository()
-            .find_current_user(&access_token)
+            .find_current_user(user_id)
             .await?
             .ok_or(AppError::UnauthenticatedError)?;
 
