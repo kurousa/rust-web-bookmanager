@@ -7,7 +7,7 @@ use crate::model::{
 };
 
 #[async_trait]
-pub trait AuthRepository {
+pub trait AuthRepository: Send + Sync {
     /// アクセストークンからユーザIDを取得する
     async fn fetch_user_id_from_token(
         &self,
