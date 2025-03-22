@@ -7,16 +7,15 @@ use kernel::model::{auth::AccessToken, id::UserId, role::Role, user::User};
 use registry::AppRegistry;
 use shared::error::AppError;
 
+/// 認証済みユーザー情報
 pub struct AuthorizedUser {
     pub access_token: AccessToken,
     pub user: User,
 }
-
 impl AuthorizedUser {
     pub fn id(&self) -> UserId {
         self.user.id
     }
-
     pub fn is_admin(&self) -> bool {
         self.user.role == Role::Admin
     }
