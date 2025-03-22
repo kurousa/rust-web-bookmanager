@@ -5,7 +5,7 @@ use std::{
 
 use adapter::{database::connect_database_with, redis::RedisClient};
 use anyhow::{Context, Result};
-use api::route::{auth, book::build_book_routers, health::build_health_check_routers};
+use api::route::{auth, v1};
 use axum::http::Method;
 use axum::Router;
 use registry::AppRegistry;
@@ -48,6 +48,7 @@ fn init_logger() -> Result<()> {
 
 #[tokio::main]
 async fn main() -> Result<()> {
+    init_logger()?;
     bootstrap().await
 }
 
@@ -68,11 +69,8 @@ async fn bootstrap() -> Result<()> {
 
     // ルーターの初期化、AppRegistryをRouterに登録
     let app = Router::new()
-        .merge(build_health_check_routers())
-        .merge(build_book_routers())
         .merge(auth::routes())
-        // TODO: implement
-        //.merge(vi::routes())
+        .merge(v1::routes())
         .layer(cors)
         .layer(
             TraceLayer::new_for_http()
