@@ -66,6 +66,9 @@ CREATE TABLE IF NOT EXISTS checkouts (
         ON DELETE RESTRICT
 );
 
+CREATE INDEX IF NOT EXISTS idx_checkouts_book_id ON checkouts (book_id);
+CREATE INDEX IF NOT EXISTS idx_checkouts_user_id ON checkouts (user_id);
+
 CREATE TABLE IF NOT EXISTS returned_checkouts (
     checkout_id UUID PRIMARY KEY,
     book_id UUID NOT NULL,
@@ -73,3 +76,6 @@ CREATE TABLE IF NOT EXISTS returned_checkouts (
     checked_out_at TIMESTAMP(3) WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     returned_at TIMESTAMP(3) WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP(3)
 );
+
+CREATE INDEX IF NOT EXISTS idx_returned_checkouts_book_id ON returned_checkouts (book_id);
+CREATE INDEX IF NOT EXISTS idx_returned_checkouts_user_id ON returned_checkouts (user_id);
