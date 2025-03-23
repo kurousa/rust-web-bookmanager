@@ -1,4 +1,4 @@
-use super::id::BookId;
+use crate::model::{id::BookId, user::BookOwner};
 
 pub mod event;
 
@@ -10,4 +10,11 @@ pub struct Book {
     pub author: String,
     pub isbn: String,
     pub description: String,
+    pub owner: BookOwner,
+}
+
+#[derive(Debug)]
+pub struct BookListOptions {
+    pub limit: i64,
+    pub offset: i64,
 }
