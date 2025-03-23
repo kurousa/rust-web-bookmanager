@@ -5,6 +5,10 @@ title: "Rust Web Book Manager ER Diagram"
 erDiagram
     roles ||--o{ users : "has"
     users ||--o{ books : "owns"
+    users ||--o{ checkouts : "borrows"
+    users ||--o{ returned_checkouts : "has"
+    books ||--o| checkouts : "is borrowed in"
+    books ||--o{ returned_checkouts : "was borrowed in"
 
     roles {
         UUID role_id PK
@@ -30,5 +34,20 @@ erDiagram
         UUID user_id FK
         TIMESTAMP created_at
         TIMESTAMP updated_at
+    }
+
+    checkouts {
+        UUID checkout_id PK
+        UUID book_id FK "UNIQUE"
+        UUID user_id FK
+        TIMESTAMP checked_out_at
+    }
+
+    returned_checkouts {
+        UUID checkout_id PK
+        UUID book_id FK
+        UUID user_id FK
+        TIMESTAMP checked_out_at
+        TIMESTAMP returned_at
     }
 ```
