@@ -60,10 +60,10 @@ CREATE TABLE IF NOT EXISTS checkouts (
 
     FOREIGN KEY (book_id) REFERENCES books(book_id)
         ON UPDATE CASCADE
-        ON DELETE CASCADE,
+        ON DELETE RESTRICT,
     FOREIGN KEY (user_id) REFERENCES users(user_id)
         ON UPDATE CASCADE
-        ON DELETE CASCADE
+        ON DELETE RESTRICT
 );
 
 CREATE TABLE IF NOT EXISTS returned_checkouts (
