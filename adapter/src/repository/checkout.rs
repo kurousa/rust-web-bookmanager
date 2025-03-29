@@ -18,6 +18,10 @@ pub struct CheckoutRepositoryImpl {
 }
 impl CheckoutRepositoryImpl {
     /// トランザクション分離レベルをSERIALIZABLEに設定する
+    ///
+    /// SERIALIZABLEに設定する必要がある理由は以下
+    /// - 貸出処理と返却処理は、同時に実行されることがあるため
+    /// - SERIALIZABLEは、最も厳格なトランザクション分離レベルであり、同時実行性を制限することで、データの整合性を保つことができる
     async fn set_transaction_serializable(
         &self,
         tx: &mut sqlx::Transaction<'_, sqlx::Postgres>,
