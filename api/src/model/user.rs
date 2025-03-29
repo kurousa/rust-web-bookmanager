@@ -156,3 +156,16 @@ impl From<kernel::model::user::BookOwner> for BookOwner {
         Self { id, name }
     }
 }
+
+#[derive(Serialize, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct CheckOutUser {
+    pub id: UserId,
+    pub name: String,
+}
+impl From<kernel::model::user::CheckOutUser> for CheckOutUser {
+    fn from(value: kernel::model::user::CheckOutUser) -> Self {
+        let kernel::model::user::CheckOutUser { id, name } = value;
+        Self { id, name }
+    }
+}

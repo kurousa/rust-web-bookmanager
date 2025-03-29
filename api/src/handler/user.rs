@@ -10,6 +10,7 @@ use shared::error::{AppError, AppResult};
 
 use crate::{
     extractor::AuthorizedUser,
+    model::checkout::CheckoutsResponse,
     model::user::{
         CreateUserRequest, UpdateUserPasswordRequest, UpdateUserPasswordRequestWithUserId,
         UpdateUserRoleRequest, UpdateUserRoleRequestWithUserId, UserResponse, UsersResponse,
@@ -100,4 +101,17 @@ pub async fn change_role(
         .await?;
 
     Ok(StatusCode::OK)
+}
+
+/// 自身が借りている書籍の一覧を取得
+pub async fn get_checkouts(
+    user: AuthorizedUser,
+    State(registry): State<AppRegistry>,
+) -> AppResult<Json<CheckoutsResponse>> {
+    registry
+        .check_out_repository()
+        .find_unreturned_by_user_id(user.id())
+        .await
+        .map(CheckoutsResponse::from)
+        .map(Json)
 }

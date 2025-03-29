@@ -6,20 +6,19 @@ use std::{
 use adapter::{database::connect_database_with, redis::RedisClient};
 use anyhow::{Context, Result};
 use api::route::{auth, v1};
-use axum::http::Method;
-use axum::Router;
+use axum::{http::Method, Router};
 use registry::AppRegistry;
 use shared::config::AppConfig;
 use tokio::net::TcpListener;
-use tower_http::cors::{Any, CorsLayer};
-use tower_http::trace::{DefaultMakeSpan, DefaultOnRequest, DefaultOnResponse, TraceLayer};
-use tower_http::LatencyUnit;
+use tower_http::{
+    cors::{self, CorsLayer},
+    trace::{DefaultMakeSpan, DefaultOnRequest, DefaultOnResponse, TraceLayer},
+    LatencyUnit,
+};
 use tracing::Level;
 
 use shared::env::{which, Environment};
-use tracing_subscriber::layer::SubscriberExt;
-use tracing_subscriber::util::SubscriberInitExt;
-use tracing_subscriber::EnvFilter;
+use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt, EnvFilter};
 
 /// ロガーの初期化
 fn init_logger() -> Result<()> {
@@ -53,7 +52,7 @@ async fn main() -> Result<()> {
 }
 
 async fn bootstrap() -> Result<()> {
-    // app_conigの初期化
+    // app_configの初期化
     let app_config = AppConfig::new()?;
     // データベース接続処理
     let pool = connect_database_with(&app_config.database);
@@ -62,10 +61,12 @@ async fn bootstrap() -> Result<()> {
     // registryの初期化
     let registry = AppRegistry::new(pool, kv, app_config);
     let cors = CorsLayer::new()
-        // allow `GET` and `POST` when accessing the resource
-        .allow_methods([Method::GET, Method::POST])
+        // allow Any headers when accessing the resource
+        .allow_headers(cors::Any)
+        // allow `GET`,`POST`,`PUT`,`DELETE` when accessing the resource
+        .allow_methods([Method::GET, Method::POST, Method::PUT, Method::DELETE])
         // allow requests from any origin
-        .allow_origin(Any);
+        .allow_origin(cors::Any);
 
     // ルーターの初期化、AppRegistryをRouterに登録
     let app = Router::new()
