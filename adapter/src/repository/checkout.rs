@@ -203,10 +203,6 @@ impl CheckoutRepository for CheckoutRepositoryImpl {
                         "指定の貸出(ID({}), ユーザー({}), 書籍({}))は、返却できません",
                         event.checkout_id, event.returned_by, event.book_id
                     )))
-                    return Err(AppError::UnprocessableEntity(format!(
-                        "指定の貸出(ID({}), ユーザー({}), 書籍({}))は、返却できません",
-                        event.checkout_id, event.returned_by, event.book_id
-                    )))
                 }
                 // それ以外
                 _ => {}
