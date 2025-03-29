@@ -1,27 +1,55 @@
-# rusty-book-manager-template
+# rust-book-manager
 
-『Rust による Web アプリケーション開発』上の蔵書管理アプリケーションを実装するために便利なテンプレートリポジトリです。本書の開発を開始するにあたり、一通り必要な設定やファイルを揃えています。
+## 動作環境
 
-このテンプレートリポジトリをお手元に clone することで、本書での開発をよりスムーズに進めることができます。このリポジトリを利用して開発を進めると、cargo-make に関する設定や Docker に関連する設定をショートカットすることができます。Rust のコードに集中して本書の理解を進めたい方はぜひ、このリポジトリをお手元に clone してください。
+Windowsで開発を行っています
+
+- (必須) Docker, Docker Composeが利用可能であること
+- (推奨) cargo makeが利用可能であること
 
 ## 使い方
 
-このリポジトリのページの右上にある「Use this repository」というボタンを押してください。ボタンを押下後、「Create a new repository」を選択します。
+- 初回インストール
 
-![Use this repository](./doc/images/readme_image_1.png)
+ ```shell
+ cargo make compose-up-db
+ # Windowsの場合
+ # cargo make migrate-on-ps
+ # それ以外の場合
+ # cargo make migrate-on-bash
+ cargo make initial-setup
+ cargo make compose-up-redis
+ ```
 
-続いて、自身のリポジトリ名を入力し、リポジトリを作成します。手元にリポジトリが作成されたら、開発を開始することができます。
+- 環境起動
+  - フロントエンド
 
-![Create a new repository](./doc/images/readme_image_2.png)
+    ```shell
+    cargo make frontend-run-in-docke
+    ```
 
-## テンプレートの内容
+    `http://localhost:3000` でアクセス可能なWebUIが起動します
 
-このテンプレートリポジトリには下記が含まれています。
+  - バックエンド
 
-- Dockerfile: Docker 向けの設定が書かれています。
-- compose.yaml: docker compose を立ち上げるために必要です。
-- Makefile.toml: cargo-make の設定のために必要です。
-- rust-toolchain.toml: 書籍と Rust のバージョンをそろえるために必要です。
-- .github: GitHub Actions の設定ファイルが主に含まれています。
-- infra: AWS 上にリソースを構築し、デプロイやリリースを一通り体験したい場合に必要です。セットアップの方法については、[README](./infra/README.md)に記載しています。
-- frontend: rust-book-manager の UI を立ち上げたい場合に必要です。立ち上げる方法は、[README](./frontend/README.md)に記載しています。
+    - Rust動作環境がローカルで構築されている場合
+      - 主にこちらで動作を確認しています
+
+    ```shell
+    cargo make run
+    ```
+
+    - Rust動作環境がローカルにない場合
+      - ローカルにRustをインストールせずに実行したい場合等に利用可能です。開発環境での検証が足りていないため、思わぬエラーが発生する可能性があります
+
+    ```shell
+    cargo make backend-run-in-docker
+    ```
+
+    `http://localhost:8080` でアクセス可能なAPIが起動します
+
+## 出典
+
+本リポジトリは、『Rust による Web アプリケーション開発』の作者提供の、以下リポジトリを元に構築しました
+
+- [rust-web-app-book/rusty-book-manager-template](https://github.com/rust-web-app-book/rusty-book-manager-template)
