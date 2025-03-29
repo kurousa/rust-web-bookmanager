@@ -15,33 +15,6 @@ pub struct BookRow {
     pub owned_by: UserId,
     pub owner_name: String,
 }
-// TODO: 後で消す
-// impl From<BookRow> for Book {
-//     fn from(value: BookRow) -> Self {
-//         // パターンマッチによる構造体からの値取り出し
-//         let BookRow {
-//             book_id,
-//             title,
-//             author,
-//             isbn,
-//             description,
-//             owned_by,
-//             owner_name,
-//         } = value;
-//         // kernelで定義したBook構造体の形式へ変換
-//         Self {
-//             id: book_id,
-//             title,
-//             author,
-//             isbn,
-//             description,
-//             owner: BookOwner {
-//                 id: owned_by,
-//                 name: owner_name,
-//             },
-//         }
-//     }
-// }
 impl BookRow {
     pub fn into_book(self, checkout: Option<CheckoutInfo>) -> Book {
         let BookRow {
