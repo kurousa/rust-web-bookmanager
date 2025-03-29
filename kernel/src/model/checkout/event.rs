@@ -6,8 +6,8 @@ use crate::model::id::{BookId, CheckoutId, UserId};
 #[derive(new)]
 pub struct CreateCheckout {
     pub book_id: BookId,
-    pub checkout_out_by: UserId,
-    pub checkout_out_at: DateTime<Utc>,
+    pub checked_out_by: UserId,
+    pub checked_out_at: DateTime<Utc>,
 }
 
 #[derive(new)]
