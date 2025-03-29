@@ -199,7 +199,7 @@ impl CheckoutRepository for CheckoutRepositoryImpl {
                     user_id: Some(u),
                     .. // ignore other fields
                 }) if c != event.checkout_id || u != event.returned_by => {
-                    return Err(AppError::UnprocessableEntity(format(
+                    return Err(AppError::UnprocessableEntity(format!(
                         "指定の貸出(ID({}), ユーザー({}), 書籍({}))は、返却できません",
                         event.checkout_id, event.returned_by, event.book_id
                     )))
