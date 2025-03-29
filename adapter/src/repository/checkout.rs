@@ -194,12 +194,15 @@ impl CheckoutRepository for CheckoutRepositoryImpl {
                         event.book_id
                     )))
                 }
-                // 蔵書が貸出中であり、かつ、貸出IDまたは借りたユーザーが異なる場合
                 Some(CheckoutStateRow {
                     checkout_id: Some(c),
                     user_id: Some(u),
-                    ..
-                }) if (c, u) != (event.checkout_id, event.returned_by) => {
+                    .. // ignore other fields
+                }) if c != event.checkout_id || u != event.returned_by => {
+                    return Err(AppError::UnprocessableEntity(format(
+                        "指定の貸出(ID({}), ユーザー({}), 書籍({}))は、返却できません",
+                        event.checkout_id, event.returned_by, event.book_id
+                    )))
                     return Err(AppError::UnprocessableEntity(format!(
                         "指定の貸出(ID({}), ユーザー({}), 書籍({}))は、返却できません",
                         event.checkout_id, event.returned_by, event.book_id
