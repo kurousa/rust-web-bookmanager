@@ -18,7 +18,7 @@ use kernel::repository::{
 use shared::config::AppConfig;
 
 #[derive(Clone)]
-pub struct AppRegistry {
+pub struct AppRegistryImpl {
     health_check_repository: Arc<dyn HealthCheckRepository>,
     book_repository: Arc<dyn BookRepository>,
     auth_repository: Arc<dyn AuthRepository>,
@@ -26,7 +26,7 @@ pub struct AppRegistry {
     check_out_repository: Arc<dyn CheckoutRepository>,
 }
 
-impl AppRegistry {
+impl AppRegistryImpl {
     pub fn new(
         pool: ConnectionPool,
         redis_client: Arc<RedisClient>,
@@ -49,24 +49,41 @@ impl AppRegistry {
             check_out_repository,
         }
     }
+}
 
-    pub fn health_check_repository(&self) -> Arc<dyn HealthCheckRepository> {
+use mockall::predicate::*;
+use mockall::*;
+
+#[automock]
+pub trait AppRegistryExt {
+    fn health_check_repository(&self) -> Arc<dyn HealthCheckRepository>;
+    fn book_repository(&self) -> Arc<dyn BookRepository>;
+    fn auth_repository(&self) -> Arc<dyn AuthRepository>;
+    fn user_repository(&self) -> Arc<dyn UserRepository>;
+    fn check_out_repository(&self) -> Arc<dyn CheckoutRepository>;
+}
+impl AppRegistryExt for AppRegistryImpl {
+    fn health_check_repository(&self) -> Arc<dyn HealthCheckRepository> {
         self.health_check_repository.clone()
     }
 
-    pub fn book_repository(&self) -> Arc<dyn BookRepository> {
+    fn book_repository(&self) -> Arc<dyn BookRepository> {
         self.book_repository.clone()
     }
 
-    pub fn auth_repository(&self) -> Arc<dyn AuthRepository> {
+    fn auth_repository(&self) -> Arc<dyn AuthRepository> {
         self.auth_repository.clone()
     }
 
-    pub fn user_repository(&self) -> Arc<dyn UserRepository> {
+    fn user_repository(&self) -> Arc<dyn UserRepository> {
         self.user_repository.clone()
     }
 
-    pub fn check_out_repository(&self) -> Arc<dyn CheckoutRepository> {
+    fn check_out_repository(&self) -> Arc<dyn CheckoutRepository> {
         self.check_out_repository.clone()
     }
 }
+
+//　従来AppRegistry型に依存していた処理に対し、
+// トレイト実装された型として挿入するために型エイリアスで、AppRegistryを再定義する
+pub type AppRegistry = Arc<dyn AppRegistryExt + Send + Sync + 'static>;
