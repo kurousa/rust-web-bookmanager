@@ -232,6 +232,8 @@ impl BookRepository for BookRepositoryImpl {
 
 #[cfg(test)]
 mod tests {
+    use std::str::FromStr;
+
     use super::*;
     use crate::repository::user::UserRepositoryImpl;
     use kernel::{model::user::event::CreateUser, repository::user::UserRepository};
@@ -292,6 +294,32 @@ mod tests {
         assert_eq!(description, "Test Description");
         assert_eq!(owner.id, user.id);
         assert_eq!(owner.name, "Test User");
+
+        Ok(())
+    }
+
+    #[sqlx::test(fixtures("common", "book"))]
+    async fn test_update_book(pool: sqlx::PgPool) -> anyhow::Result<()> {
+        let repo = BookRepositoryImpl::new(ConnectionPool::new(pool.clone()));
+        // fixtures/book.sqlに記載のBookIDを指定
+        let book_id = BookId::from_str("9890736e-a4e4-461a-a77d-eac3517ef11b").unwrap();
+        let book = repo.find_by_id(book_id).await?.unwrap();
+        const NEW_AUTHOR: &str = "New Author";
+        assert_ne!(book.author, NEW_AUTHOR);
+
+        let update_book = UpdateBook {
+            book_id: book.id,
+            title: book.title,
+            author: NEW_AUTHOR.into(),
+            isbn: book.isbn,
+            description: book.description,
+            // fixtures/common.sqlに記載のユーザーIDを指定
+            requested_user: UserId::from_str("5b4c96ac-316a-4bee-8e69-cac5eb84ff4c").unwrap(),
+        };
+        repo.update(update_book).await.unwrap();
+
+        let book = repo.find_by_id(book_id).await?.unwrap();
+        assert_eq!(book.author, NEW_AUTHOR);
 
         Ok(())
     }
