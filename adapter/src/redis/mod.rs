@@ -42,3 +42,77 @@ impl RedisClient {
         Ok(())
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use shared::error::AppError;
+
+    #[derive(Debug, PartialEq, Eq)]
+    pub struct TestContent {
+        pub name: String,
+    }
+    impl TryFrom<String> for TestContent {
+        type Error = AppError;
+        fn try_from(value: String) -> Result<Self, Self::Error> {
+            Ok(Self { name: value })
+        }
+    }
+    impl RedisValue for TestContent {
+        fn inner(&self) -> String {
+            self.name.to_string()
+        }
+    }
+
+    pub struct TestContentKey(String);
+    impl RedisKey for TestContentKey {
+        type Value = TestContent;
+        fn inner(&self) -> String {
+            self.0.to_string()
+        }
+    }
+
+    #[sqlx::test]
+    async fn test_con() -> anyhow::Result<()> {
+        let config = RedisConfig {
+            host: std::env::var("REDIS_HOST").unwrap(),
+            port: std::env::var("REDIS_PORT").unwrap().parse().unwrap(),
+        };
+        let client = RedisClient::new(&config)?;
+
+        // 存在しないトークンを取得
+        let res_no_exist_token = client.get(&TestContentKey("redis:key".to_string())).await?;
+        assert!(res_no_exist_token.is_none());
+
+        // トークンをセット
+        client
+            .set_ex(
+                &TestContentKey("redis:key".to_string()),
+                &TestContent {
+                    name: "test".to_string(),
+                },
+                1000,
+            )
+            .await?;
+
+        // トークンが取得できる
+        let res_exist_token = client.get(&TestContentKey("redis:key".to_string())).await?;
+        assert_eq!(
+            res_exist_token,
+            Some(TestContent {
+                name: "test".to_string()
+            })
+        );
+
+        // トークンを削除
+        client
+            .delete(&TestContentKey("redis:key".to_string()))
+            .await?;
+
+        // トークンを取得できない
+        let res_deleted = client.get(&TestContentKey("redis:key".to_string())).await?;
+        assert!(res_deleted.is_none());
+
+        Ok(())
+    }
+}
