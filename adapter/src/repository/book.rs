@@ -299,7 +299,17 @@ mod tests {
     }
 
     #[sqlx::test(fixtures("common", "book"))]
-    async fn test_update_book(pool: sqlx::PgPool) -> anyhow::Result<()> {
+    async fn test_update_book_not_found(pool: sqlx::PgPool) -> anyhow::Result<()> {
+        let repo = BookRepositoryImpl::new(ConnectionPool::new(pool.clone()));
+        let book_id = BookId::from_str("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa").unwrap(); // 存在しないBookID
+        let book = repo.find_by_id(book_id).await?;
+        assert!(book.is_none());
+
+        Ok(())
+    }
+
+    #[sqlx::test(fixtures("common", "book"))]
+    async fn test_update_book_success(pool: sqlx::PgPool) -> anyhow::Result<()> {
         let repo = BookRepositoryImpl::new(ConnectionPool::new(pool.clone()));
         // fixtures/book.sqlに記載のBookIDを指定
         let book_id = BookId::from_str("9890736e-a4e4-461a-a77d-eac3517ef11b").unwrap();
@@ -323,4 +333,3 @@ mod tests {
 
         Ok(())
     }
-}
