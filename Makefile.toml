@@ -24,6 +24,7 @@ REDIS_HOST = "redis"
 REDIS_PORT = "${REDIS_PORT_INNER}"
 JAEGER_HOST = "jaeger"
 JAEGER_PORT = 6831
+JAEGER_MAX_PACKET_SIZE = 8192
 BACKEND_HOST = "backend"
 BACKEND_PORT = 8080
 FRONTEND_PORT = 3000
@@ -37,6 +38,7 @@ REDIS_HOST = "localhost"
 REDIS_PORT = "${REDIS_PORT_OUTER}"
 JAEGER_HOST = "localhost"
 JAEGER_PORT = 6831
+JAEGER_MAX_PACKET_SIZE = 8192
 BACKEND_HOST = "localhost"
 BACKEND_PORT = 8080
 FRONTEND_PORT = 3000
@@ -57,6 +59,7 @@ run_task = [
         "compose-up-db",
         "migrate-with-ps",
         "compose-up-redis",
+        "compose-up-jaeger",
     ] },
 ]
 
@@ -289,6 +292,11 @@ args = ["compose", "up", "-d", "postgres"]
 extend = "set-env-docker"
 command = "docker"
 args = ["compose", "up", "-d", "redis"]
+
+[tasks.compose-up-jaeger]
+extend = "set-env-docker"
+command = "docker"
+args = ["compose", "up", "-d", "jaeger"]
 
 [tasks.compose-down]
 extend = "set-env-docker"
