@@ -15,7 +15,6 @@ shared.workspace = true
 registry.workspace = true
 axum.workspace = true
 derive-new.workspace = true
-utoipa.workspace = true
 chrono.workspace = true
 tokio.workspace = true
 tracing.workspace = true
