@@ -34,7 +34,10 @@ fn init_logger() -> Result<()> {
     let subscriber = tracing_subscriber::fmt::layer()
         .with_file(true)
         .with_line_number(true)
-        .with_target(true);
+        .with_target(false);
+    // リリースビルドではJSON形式で出力
+    #[cfg(not(debug_assertions))]
+    let subscriber = subscriber.json();
 
     // ロガーの登録
     tracing_subscriber::registry()
