@@ -81,15 +81,14 @@ jobs:
 
   security:
     name: Security audit
+    # run if the event is a push or if the pull request changed Cargo.toml or Cargo.lock
+    if: ${{ github.event_name == 'push' || contains(github.event.pull_request.changed_files, 'Cargo.toml') || contains(github.event.pull_request.changed_files, 'Cargo.lock') }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install cargo-audit
-        uses: taiki-e/install-action@v2
-        with:
-          tool: cargo-audit
-
       - name: Run security audit
-        run: cargo audit
+        uses: rustsec/audit-check@v2.0.0
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
