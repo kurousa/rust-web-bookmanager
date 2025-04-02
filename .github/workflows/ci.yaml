@@ -6,42 +6,89 @@ on:
     paths-ignore:
       - "README.md"
       - "frontend/**"
+      - "doc/**"
+      - "LICENSE"
+      - ".gitignore"
+      - ".gemini/**"
+
+env:
+  CARGO_INCREMENTAL: 0
 
 jobs:
-  check:
-    name: Check
+  test:
+    name: Test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
       - name: Cache dependencies
-        uses: Swatinem/rust-cache@v2
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-test-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-test-
 
-      - name: Install Rust toolchain
-        run: |
-          rustup toolchain install stable
-
-      - name: Install cargo-related tools
+      - name: Install cargo-make
         uses: taiki-e/install-action@v2
         with:
-          tool: nextest,cargo-make,cargo-machete
+          tool: cargo-make,cargo-nextest
 
-      - name: Tests compile
-        run: cargo make test-ci --no-run --locked
-
-      - name: Test
+      - name: Run tests
         run: cargo make test-ci
 
-      - name: Clippy
-        run: cargo make clippy-ci -- -Dwarnings
+  lint:
+    name: Lint and Format
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
 
-      - name: Rustfmt
+      - name: Install Rust with components
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
+
+      - name: Cache dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-lint-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-lint-
+
+      - name: Install cargo-make
+        uses: taiki-e/install-action@v2
+        with:
+          tool: cargo-make,cargo-machete
+
+      - name: Check formatting
         run: cargo make fmt -- --check
+
+      - name: Run clippy
+        run: cargo make clippy-ci -- -Dwarnings
 
       - name: Check unused dependencies
         run: cargo machete
-        continue-on-error: true
 
-      # - name: Fix by autofix-ci
-      #   uses: autofix-ci/action@551dded8c6cc8a1054039c8bc0b8b48c51dfc6ef
+  security:
+    name: Security audit
+    # run if the event is a push or if the pull request changed Cargo.toml or Cargo.lock
+    if: ${{ github.event_name == 'push' || contains(github.event.pull_request.changed_files, 'Cargo.toml') || contains(github.event.pull_request.changed_files, 'Cargo.lock') }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run security audit
+        uses: rustsec/audit-check@v2.0.0
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 

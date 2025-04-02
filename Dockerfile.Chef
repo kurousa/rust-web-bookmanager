@@ -1,0 +1,33 @@
+FROM lukemathwalker/cargo-chef:latest-rust-1.84.0 AS chef
+WORKDIR /app
+
+FROM chef AS planner
+
+COPY . .
+
+RUN cargo chef prepare --recipe-path recipe.json
+
+FROM chef AS builder
+
+COPY --from=planner /app/recipe.json recipe.json
+RUN cargo chef cook --release --recipe-path recipe.json
+
+# 最終ステージには小さなベースイメージを使用
+FROM debian:bookworm-slim AS runner
+WORKDIR /app
+
+RUN adduser book && chown -R book /app
+USER book
+
+# ビルダー段階からビルドされたアプリケーションをコピー
+ARG APP_NAME=app
+COPY --from=builder /app/target/release/${APP_NAME} /app/${APP_NAME}
+
+# 環境変数を設定
+ARG DATABASE_URL
+ENV DATABASE_URL=${DATABASE_URL}
+ENV PORT=8080
+EXPOSE ${PORT}
+
+# ENTRYPOINTをexec形式で使用
+ENTRYPOINT ["/app/${APP_NAME}"]

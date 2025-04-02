@@ -47,11 +47,22 @@ pub async fn show_book_list(
 }
 
 /// ID指定蔵書取得
+// スパン生成
+#[tracing::instrument(
+    // スパンに含めない情報を指定
+    skip(_user, registry),
+    // スパンに含める情報に対し加工を行う場合
+    fields(
+        book_id = %book_id.to_string(),
+        user_id = %_user.user.id.to_string(),
+    )
+)]
 pub async fn show_book(
     _user: AuthorizedUser,
     Path(book_id): Path<BookId>,
     State(registry): State<AppRegistry>,
 ) -> AppResult<Json<BookResponse>> {
+    tracing::info!("show_book called");
     registry
         .book_repository()
         .find_by_id(book_id)
@@ -71,7 +82,7 @@ pub async fn update_book(
 ) -> AppResult<StatusCode> {
     req.validate(&())?;
 
-    let update_book = UpdateBookRequestWithIds::new(book_id, user.id(), req.into());
+    let update_book = UpdateBookRequestWithIds::new(book_id, user.id(), req);
 
     registry
         .book_repository()
