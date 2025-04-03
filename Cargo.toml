@@ -33,11 +33,6 @@ async-trait = "0.1.74"
 anyhow = "1.0.75"
 axum = { version = "0.7.5", features = ["macros"] }
 derive-new = "0.6.0"
-utoipa = { version = "4.1.0", features = [
-    "axum_extras",
-    "uuid",
-    "chrono",
-] }
 uuid = { version = "1.4.0", features = [
     "v4",
     "serde",
@@ -68,6 +63,8 @@ garde = { version = "0.18.0", features = [
     "derive",
     "email",
 ] }
+utoipa = { version = "4.1.0", features = ["axum_extras","uuid","chrono"]}
+utoipa-redoc = { version = "2.0.0", features = ["axum"]}
 
 [dependencies]
 tower-http = { version = "0.5.0", features = ["cors", "trace"] }
@@ -86,6 +83,8 @@ tracing-subscriber = { version = "0.3.18", features = [
 opentelemetry = "0.21.0"
 tracing-opentelemetry = "0.22.0"
 opentelemetry-jaeger = { version = "0.20.0", features = ["rt-tokio"] }
+utoipa.workspace = true
+utoipa-redoc.workspace = true
 
 [profile.dev]
 debug = 0
