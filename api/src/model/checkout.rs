@@ -4,9 +4,12 @@ use kernel::model::{
     id::{BookId, CheckoutId, UserId},
 };
 use serde::Serialize;
+#[cfg(debug_assertions)]
+use utoipa::ToSchema;
 
 /// 貸出情報内の本の情報を返すレスポンス
 #[derive(Serialize)]
+#[cfg_attr(debug_assertions, derive(ToSchema))]
 #[serde(rename_all = "camelCase")]
 pub struct CheckoutBookResponse {
     pub id: BookId,
@@ -33,6 +36,7 @@ impl From<CheckoutBook> for CheckoutBookResponse {
 
 /// 貸出情報のレスポンス
 #[derive(Serialize)]
+#[cfg_attr(debug_assertions, derive(ToSchema))]
 #[serde(rename_all = "camelCase")]
 pub struct CheckoutResponse {
     pub id: CheckoutId,
@@ -62,6 +66,7 @@ impl From<Checkout> for CheckoutResponse {
 
 /// 貸出情報のレスポンスのリスト
 #[derive(Serialize)]
+#[cfg_attr(debug_assertions, derive(ToSchema))]
 #[serde(rename_all = "camelCase")]
 pub struct CheckoutsResponse {
     pub items: Vec<CheckoutResponse>,
