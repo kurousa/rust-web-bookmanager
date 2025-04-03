@@ -31,6 +31,22 @@ pub async fn register_book(
 }
 
 /// 蔵書一覧取得
+#[cfg_attr(
+    debug_assertions,
+    utoipa::path(
+        get,
+        path = "/api/v1/books",
+        responses (
+            (status = 200, description = "蔵書一覧取得成功", body = PaginatedBookResponse),
+            (status = 400, description = "リクエストパラメータ不正",),
+            (status = 401, description = "認証エラー",),
+        ),
+        params(
+            ("limit" = i64, Query, description = "取得件数"),
+            ("offset" = i64, Query, description = "取得開始位置"),
+        )
+    )
+)]
 pub async fn show_book_list(
     _user: AuthorizedUser,
     Query(query): Query<BookListQuery>,
