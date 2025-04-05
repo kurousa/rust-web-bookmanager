@@ -18,8 +18,14 @@ use tower_http::{
 };
 use tracing::Level;
 
+#[cfg(debug_assertions)]
+use api::openapi::ApiDoc;
 use shared::env::{which, Environment};
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt, EnvFilter};
+#[cfg(debug_assertions)]
+use utoipa::OpenApi;
+#[cfg(debug_assertions)]
+use utoipa_redoc::{Redoc, Servable};
 
 /// ロガーの初期化
 fn init_logger() -> Result<()> {
@@ -92,10 +98,13 @@ async fn bootstrap() -> Result<()> {
         // allow requests from any origin
         .allow_origin(cors::Any);
 
+    let router = Router::new().merge(v1::routes()).merge(auth::routes());
+    // デバッグビルドの時は, ReDocによるAPIドキュメント出力を有効にする
+    #[cfg(debug_assertions)]
+    let router = router.merge(Redoc::with_url("/docs", ApiDoc::openapi()));
+
     // ルーターの初期化、AppRegistryをRouterに登録
-    let app = Router::new()
-        .merge(auth::routes())
-        .merge(v1::routes())
+    let app = router
         .layer(cors)
         .layer(
             TraceLayer::new_for_http()

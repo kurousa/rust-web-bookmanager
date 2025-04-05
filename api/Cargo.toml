@@ -25,6 +25,7 @@ tokio-stream.workspace = true
 garde.workspace = true
 anyhow.workspace = true
 serde.workspace = true
+utoipa.workspace = true
 
 [dev-dependencies]
 hyper = "0.14.27"

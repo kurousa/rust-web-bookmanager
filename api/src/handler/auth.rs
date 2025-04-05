@@ -10,6 +10,17 @@ use crate::{
 
 /// ログイン処理
 /// ユーザーの認証を行い、アクセストークンを発行する
+#[cfg_attr(
+    debug_assertions,
+    utoipa::path(
+        post,
+        path = "/api/auth/login",
+        request_body = LoginRequest,
+        responses (
+            (status = 200, description = "ログイン成功", body = AccessTokenResponse),
+        ),
+    )
+)]
 pub async fn login(
     State(registry): State<AppRegistry>,
     Json(req): Json<LoginRequest>,
@@ -29,6 +40,17 @@ pub async fn login(
     }))
 }
 /// ログアウト処理
+/// ユーザーのアクセストークンを削除する
+#[cfg_attr(
+    debug_assertions,
+    utoipa::path(
+        get,
+        path = "/api/auth/logout",
+        responses (
+            (status = 204, description = "ログアウト成功",),
+        ),
+    )
+)]
 pub async fn logout(
     user: AuthorizedUser,
     State(registry): State<AppRegistry>,

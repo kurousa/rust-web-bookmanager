@@ -10,8 +10,11 @@ use kernel::model::{
 };
 use serde::{Deserialize, Serialize};
 use strum::VariantNames;
+#[cfg(debug_assertions)]
+use utoipa::ToSchema;
 
 #[derive(Serialize, Deserialize, VariantNames)]
+#[cfg_attr(debug_assertions, derive(ToSchema))]
 #[strum(serialize_all = "kebab-case")]
 /// UserResponseにおけるRoleの列挙型
 pub enum RoleName {
@@ -36,6 +39,7 @@ impl From<RoleName> for Role {
 }
 
 #[derive(Serialize, Deserialize)]
+#[cfg_attr(debug_assertions, derive(ToSchema))]
 #[serde(rename_all = "camelCase")]
 /// UserResponseを一覧で返すためのモデル
 pub struct UsersResponse {
@@ -43,6 +47,7 @@ pub struct UsersResponse {
 }
 
 #[derive(Serialize, Deserialize)]
+#[cfg_attr(debug_assertions, derive(ToSchema))]
 #[serde(rename_all = "camelCase")]
 /// ユーザー情報のレスポンスモデル
 pub struct UserResponse {
@@ -69,6 +74,7 @@ impl From<User> for UserResponse {
 }
 
 #[derive(Deserialize, Validate)]
+#[cfg_attr(debug_assertions, derive(ToSchema))]
 #[serde(rename_all = "camelCase")]
 /// パスワード更新ペイロード
 pub struct UpdateUserPasswordRequest {
@@ -79,6 +85,7 @@ pub struct UpdateUserPasswordRequest {
 }
 
 #[derive(new)]
+#[cfg_attr(debug_assertions, derive(ToSchema))]
 /// ユーザーIDを持つパスワード更新ペイロード
 pub struct UpdateUserPasswordRequestWithUserId(UserId, UpdateUserPasswordRequest);
 impl From<UpdateUserPasswordRequestWithUserId> for UpdateUserPassword {
@@ -100,6 +107,7 @@ impl From<UpdateUserPasswordRequestWithUserId> for UpdateUserPassword {
 }
 
 #[derive(Deserialize, Validate)]
+#[cfg_attr(debug_assertions, derive(ToSchema))]
 #[serde(rename_all = "camelCase")]
 /// ユーザー作成ペイロード
 pub struct CreateUserRequest {
@@ -126,12 +134,14 @@ impl From<CreateUserRequest> for CreateUser {
 }
 
 #[derive(Deserialize)]
+#[cfg_attr(debug_assertions, derive(ToSchema))]
 #[serde(rename_all = "camelCase")]
 /// ロール更新ペイロード
 pub struct UpdateUserRoleRequest {
     role: RoleName,
 }
 #[derive(new)]
+#[cfg_attr(debug_assertions, derive(ToSchema))]
 /// ユーザーIDを持つロール更新ペイロード
 pub struct UpdateUserRoleRequestWithUserId(UserId, UpdateUserRoleRequest);
 impl From<UpdateUserRoleRequestWithUserId> for UpdateUserRole {
@@ -145,6 +155,7 @@ impl From<UpdateUserRoleRequestWithUserId> for UpdateUserRole {
 }
 
 #[derive(Serialize, Debug, Deserialize)]
+#[cfg_attr(debug_assertions, derive(ToSchema))]
 #[serde(rename_all = "camelCase")]
 pub struct BookOwner {
     pub id: UserId,
@@ -158,6 +169,7 @@ impl From<kernel::model::user::BookOwner> for BookOwner {
 }
 
 #[derive(Serialize, Debug, Deserialize)]
+#[cfg_attr(debug_assertions, derive(ToSchema))]
 #[serde(rename_all = "camelCase")]
 pub struct CheckOutUser {
     pub id: UserId,
