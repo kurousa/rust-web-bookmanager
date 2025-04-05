@@ -123,6 +123,14 @@ run_task = [
 ]
 watch = true
 
+[tasks.watch-simple]
+extend = "set-env-local"
+dependencies = ["before-build"]
+run_task = [
+    { name = ["check", "run"] }
+]
+watch = true
+
 # cargo check
 [tasks.check]
 extend = "set-env-local"
