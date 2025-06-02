@@ -40,17 +40,18 @@ uuid = { version = "1.4.0", features = [
 chrono = { version = "0.4.26", default-features = false, features = ["serde"] }
 serde = { version = "1.0.174", features = ["derive"] }
 secrecy = "0.8.0"
-sqlx = { version = "0.7.3", features = [
+sqlx = { version = "0.8.1", features = [ # Updated to address RUSTSEC-2024-0363
     "runtime-tokio",
     "uuid",
     "chrono",
-    "macros",
+    # "macros", # Temporarily removed
+    # "offline", # Temporarily removed
     "postgres",
     "migrate",
 ] }
 strum = { version = "0.26.2", features = ["derive"] }
 thiserror = "1.0.44"
-tokio = { version = "1.37.0", features = ["full"] }
+tokio = { version = "1.38.0", features = ["full"] } # Updated tokio
 mockall = "0.11.4"
 redis = { version = "0.25.3", features = ["tokio-rustls-comp"] }
 bcrypt = "0.15.0"
