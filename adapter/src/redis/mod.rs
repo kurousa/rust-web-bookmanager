@@ -1,9 +1,20 @@
 pub mod model;
 
 use redis::{AsyncCommands, Client};
-use shared::{config::RedisConfig, error::AppResult};
+use shared::{config::RedisConfig, error::{AppError, AppResult}};
 
 use self::model::{RedisKey, RedisValue};
+
+#[cfg_attr(test, mockall::automock)]
+#[async_trait::async_trait]
+pub trait RedisClientTrait: Send + Sync {
+    async fn set_ex<T: RedisKey + Send + Sync>(&self, key: &T, value: &T::Value, ttl: u64) -> AppResult<()>;
+    async fn get<T: RedisKey + Send + Sync>(&self, key: &T) -> AppResult<Option<T::Value>>
+    where
+        T::Value: TryFrom<String, Error = AppError> + Send + Sync;
+    async fn delete<T: RedisKey + Send + Sync>(&self, key: &T) -> AppResult<()>;
+    async fn try_connect(&self) -> AppResult<()>;
+}
 
 pub struct RedisClient {
     client: Client,
@@ -40,6 +51,28 @@ impl RedisClient {
     pub async fn try_connect(&self) -> AppResult<()> {
         let _ = self.client.get_multiplexed_async_connection().await?;
         Ok(())
+    }
+}
+
+#[async_trait::async_trait]
+impl RedisClientTrait for RedisClient {
+    async fn set_ex<T: RedisKey + Send + Sync>(&self, key: &T, value: &T::Value, ttl: u64) -> AppResult<()> {
+        RedisClient::set_ex(self, key, value, ttl).await
+    }
+
+    async fn get<T: RedisKey + Send + Sync>(&self, key: &T) -> AppResult<Option<T::Value>>
+    where
+        T::Value: TryFrom<String, Error = AppError> + Send + Sync,
+    {
+        RedisClient::get(self, key).await
+    }
+
+    async fn delete<T: RedisKey + Send + Sync>(&self, key: &T) -> AppResult<()> {
+        RedisClient::delete(self, key).await
+    }
+
+    async fn try_connect(&self) -> AppResult<()> {
+        RedisClient::try_connect(self).await
     }
 }
 
