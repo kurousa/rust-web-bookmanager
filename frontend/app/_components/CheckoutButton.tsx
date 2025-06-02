@@ -39,7 +39,7 @@ const CheckoutButton: FC<CheckoutButtonProps> = ({
   const onClickReturningSubmit = async (e: React.SyntheticEvent) => {
     e.preventDefault();
     const res = await put({
-      destination: `/api/v1/books/${book.id}/checkouts/${book.checkout?.id}/returned`,
+      destination: `/api/v1/books/${book.id}/checkouts/${book.checkout?.id}`,
       token: accessToken,
     });
 
