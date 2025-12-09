@@ -25,7 +25,7 @@ Windowsで開発を行っています
   - フロントエンド
 
     ```shell
-    cargo make frontend-run-in-docke
+    cargo make frontend-run-in-docker
     ```
 
     `http://localhost:3000` でアクセス可能なWebUIが起動します
