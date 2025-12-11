@@ -13,7 +13,7 @@ COPY --from=planner /app/recipe.json recipe.json
 RUN cargo chef cook --release --recipe-path recipe.json
 
 # 最終ステージには小さなベースイメージを使用
-FROM debian:bookworm-slim AS runner
+FROM debian:trixie-slim AS runner
 WORKDIR /app
 
 RUN adduser book && chown -R book /app
