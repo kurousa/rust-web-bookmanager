@@ -7,7 +7,7 @@ ENV DATABASE_URL=${DATABASE_URL}
 COPY . .
 RUN cargo build --release
 
-FROM debian:bookworm-slim
+FROM debian:13.2-slim
 WORKDIR /app
 RUN adduser book && chown -R book /app
 USER book
