@@ -19,7 +19,7 @@ COPY . .
 RUN cargo build --release
 
 # 最終ステージには小さなベースイメージを使用
-FROM debian:bookworm-slim
+FROM debian:13.2-slim
 WORKDIR /app
 
 RUN adduser book && chown -R book /app
