@@ -14,10 +14,10 @@ const AuthProvider: FC<{ children: React.ReactNode }> = ({ children }) => {
 
 export default AuthProvider;
 
-const accessTokenKey = process.env.NEXT_PUBLIC_ACCESS_TOKEN_KEY;
-
-if (!accessTokenKey) {
-  throw new Error("NEXT_PUBLIC_ACCESS_TOKEN_KEY is not defined");
-}
-
-export const ACCESS_TOKEN_KEY = accessTokenKey;
+export const ACCESS_TOKEN_KEY = (() => {
+  const key = process.env.NEXT_PUBLIC_ACCESS_TOKEN_KEY;
+  if (!key) {
+    throw new Error("NEXT_PUBLIC_ACCESS_TOKEN_KEY is not defined");
+  }
+  return key;
+})();
