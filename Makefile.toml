@@ -177,6 +177,20 @@ args = [
   "--no-tests=pass"
 ]
 
+# cargo auditによる脆弱性スキャン
+[tasks.audit]
+extend = "set-env-local"
+command = "docker"
+args = [
+    "run", "--rm",
+    "-v", "${CARGO_MAKE_WORKING_DIRECTORY}:/work",
+    "-w", "/work",
+    "rust:1.89",
+    "/bin/bash", "-c",
+    "cargo install cargo-audit && cargo audit"
+]
+
+
 # CIからのclippy呼び出し用
 [tasks.clippy-ci]
 extend = "set-env-local"
