@@ -39,18 +39,23 @@ fn init_logger() -> Result<()> {
     let jaeger_host = std::env::var("JAEGER_HOST")?;
     let jaeger_port = std::env::var("JAEGER_PORT")?;
     dbg!(&jaeger_host, &jaeger_port);
-    let jaeger_max_packet_size =
-        std::env::var("JAEGER_MAX_PACKET_SIZE").unwrap_or("8192".to_string());
-    let jaeger_endpoint = format!("{}:{}", jaeger_host, jaeger_port);
+    let jaeger_endpoint = format!("http://{}:{}", jaeger_host, jaeger_port);
     dbg!(&jaeger_endpoint);
 
-    global::set_text_map_propagator(opentelemetry_jaeger::Propagator::new());
-    let jaeger_tracer = opentelemetry_jaeger::new_agent_pipeline()
-        .with_endpoint(jaeger_endpoint)
-        .with_service_name("rust-web-bookmanager")
-        .with_auto_split_batch(true)
-        .with_max_packet_size(jaeger_max_packet_size.parse::<usize>()?)
-        .install_simple()?;
+    global::set_text_map_propagator(opentelemetry_jaeger_propagator::Propagator::new());
+    let jaeger_tracer = opentelemetry_otlp::new_pipeline()
+        .tracing()
+        .with_exporter(
+            opentelemetry_otlp::new_exporter()
+                .tonic()
+                .with_endpoint(jaeger_endpoint),
+        )
+        .with_trace_config(
+            opentelemetry_sdk::trace::config().with_resource(opentelemetry_sdk::Resource::new(vec![
+                opentelemetry::KeyValue::new("service.name", "rust-web-bookmanager"),
+            ])),
+        )
+        .install_batch(opentelemetry_sdk::runtime::Tokio)?;
     let opentelemetry = tracing_opentelemetry::layer().with_tracer(jaeger_tracer);
 
     let env_filter = EnvFilter::try_from_default_env().unwrap_or_else(|_| log_level.into());

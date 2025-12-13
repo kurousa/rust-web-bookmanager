@@ -39,7 +39,6 @@ uuid = { version = "1.4.0", features = [
 ] }
 chrono = { version = "0.4.26", default-features = false, features = ["serde"] }
 serde = { version = "1.0.174", features = ["derive"] }
-secrecy = "0.8.0"
 sqlx = { version = "0.8.1", features = [ # Updated to address RUSTSEC-2024-0363
     "runtime-tokio",
     "uuid",
@@ -55,7 +54,6 @@ tokio = { version = "1.38.0", features = ["full"] } # Updated tokio
 mockall = "0.11.4"
 redis = { version = "0.25.3", features = ["tokio-rustls-comp"] }
 bcrypt = "0.15.0"
-itertools = "0.11.0"
 tower = { version = "0.4.13", features = ["full"] }
 tracing = { version = "0.1.37", features = ["log"] }
 axum-extra = { version = "0.9.3", features = ["typed-header"] }
@@ -64,8 +62,8 @@ garde = { version = "0.18.0", features = [
     "derive",
     "email",
 ] }
-utoipa = { version = "4.1.0", features = ["axum_extras","uuid","chrono"]}
-utoipa-redoc = { version = "2.0.0", features = ["axum"]}
+utoipa = { version = "5.4.0", features = ["axum_extras","uuid","chrono"]}
+utoipa-redoc = { version = "6.0.0", features = ["axum"]}
 
 [dependencies]
 tower-http = { version = "0.5.0", features = ["cors", "trace"] }
@@ -81,17 +79,16 @@ tracing-subscriber = { version = "0.3.18", features = [
     "env-filter",
     "json",
 ]}
-opentelemetry = "0.21.0"
-tracing-opentelemetry = "0.22.0"
-opentelemetry-jaeger = { version = "0.20.0", features = ["rt-tokio"] }
 utoipa.workspace = true
 utoipa-redoc.workspace = true
+opentelemetry = "0.31.0"
+tracing-opentelemetry = "0.32.0"
+opentelemetry_sdk = "0.31.0"
+opentelemetry-otlp = { version = "0.31.0", features = ["tonic"] }
+opentelemetry-jaeger-propagator = "0.31.0"
 
 [profile.dev]
 debug = 0
-
-[profile.dev.package.sqlx-macros]
-opt-level = 3
 
 [dev-dependencies]
 rstest = "0.25.0"

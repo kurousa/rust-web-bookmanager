@@ -1,4 +1,10 @@
 [advisories]
-# Ignoring RUSTSEC-2025-0026 because it refers to the crate bbqsrc/registry-rs
-# on crates.io, which is different from our local workspace crate also named "registry".
-ignore = ["RUSTSEC-2025-0026"]
+ignore = [
+    # Ignoring RUSTSEC-2025-0026 because it refers to the crate bbqsrc/registry-rs
+    # on crates.io, which is different from our local workspace crate also named "registry".
+    "RUSTSEC-2025-0026",
+    # No Fix Available
+    "RUSTSEC-2023-0071",
+    # No workaround available 
+    "RUSTSEC-2025-0134",
+]
