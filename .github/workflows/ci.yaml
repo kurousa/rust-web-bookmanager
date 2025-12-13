@@ -11,6 +11,12 @@ on:
       - ".gitignore"
       - ".gemini/**"
 
+# Grant the workflow the permissions required to create check runs and read repo contents.
+permissions:
+  checks: write
+  contents: read
+  actions: read
+
 env:
   CARGO_INCREMENTAL: 0
 
