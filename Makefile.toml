@@ -187,7 +187,7 @@ args = [
     "-w", "/work",
     "rust:1.89",
     "/bin/bash", "-c",
-    "cargo install cargo-audit && cargo audit"
+    "RUSTUP_TOOLCHAIN=1.89 cargo install cargo-audit && RUSTUP_TOOLCHAIN=1.89cargo audit"
 ]
 
 
