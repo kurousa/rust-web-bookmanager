@@ -8,6 +8,19 @@
 
 - https://nodejs.org/en/download/package-manager
 
+## 環境変数の設定
+
+アプリケーションを起動する前に、環境変数を設定する必要があります。
+`frontend` ディレクトリ直下に `.env.local` ファイルを作成し、以下の変数を定義してください。
+
+- `NEXT_PUBLIC_ACCESS_TOKEN_KEY`: ローカルストレージにアクセストークンを保存する際のキー名
+
+設定例:
+
+```env
+NEXT_PUBLIC_ACCESS_TOKEN_KEY="access-token"
+```
+
 ## 画面の立ち上げ
 
 ローカルで立ち上げる場合、次の手順で立ち上がります。
