@@ -1,4 +1,4 @@
-FROM rust:1.84-slim-bookworm AS builder
+FROM rust:slim-trixie AS builder
 
 WORKDIR /app
 
