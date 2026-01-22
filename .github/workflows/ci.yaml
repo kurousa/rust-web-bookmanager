@@ -31,7 +31,7 @@ jobs:
       - name: Install Rust
         uses: actions-rs/toolchain@v1
         with:
-          toolchain: 1.89.0
+          toolchain: 1.93.0
           override: true
 
       - name: Cache dependencies
@@ -62,7 +62,7 @@ jobs:
       - name: Install Rust with components
         uses: actions-rs/toolchain@v1
         with:
-          toolchain: 1.89.0
+          toolchain: 1.93.0
           override: true
           components: clippy, rustfmt
 
@@ -103,7 +103,7 @@ jobs:
       - name: Install Rust (required for cargo-audit)
         uses: actions-rs/toolchain@v1
         with:
-          toolchain: 1.89.0
+          toolchain: 1.93.0
           override: true
 
       - name: Check whether Cargo files changed (skip on PRs without Cargo changes)
