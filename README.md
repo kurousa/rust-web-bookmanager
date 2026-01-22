@@ -14,9 +14,9 @@ Windowsで開発を行っています
  ```shell
  cargo make compose-up-db
  # Windowsの場合
- # cargo make migrate-on-ps
+ # cargo make migrate-with-ps
  # それ以外の場合
- # cargo make migrate-on-bash
+ # cargo make migrate-with-bash
  cargo make initial-setup
  cargo make compose-up-redis
  ```

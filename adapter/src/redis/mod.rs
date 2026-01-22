@@ -18,7 +18,8 @@ impl RedisClient {
     /// 指定した期限(ttl)が経過するとキーとバリューは削除される
     pub async fn set_ex<T: RedisKey>(&self, key: &T, value: &T::Value, ttl: u64) -> AppResult<()> {
         let mut conn = self.client.get_multiplexed_async_connection().await?;
-        conn.set_ex(key.inner(), value.inner(), ttl).await?;
+        conn.set_ex::<_, _, ()>(key.inner(), value.inner(), ttl)
+            .await?;
         Ok(())
     }
 
@@ -32,7 +33,7 @@ impl RedisClient {
     /// キーを指定して、Redisから該当のキーとバリューを削除する
     pub async fn delete<T: RedisKey>(&self, key: &T) -> AppResult<()> {
         let mut conn = self.client.get_multiplexed_async_connection().await?;
-        conn.del(key.inner()).await?;
+        conn.del::<_, ()>(key.inner()).await?;
         Ok(())
     }
 
