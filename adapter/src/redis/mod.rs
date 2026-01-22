@@ -19,7 +19,7 @@ impl RedisClient {
     pub async fn set_ex<T: RedisKey>(&self, key: &T, value: &T::Value, ttl: u64) -> AppResult<()> {
         let mut conn = self.client.get_multiplexed_async_connection().await?;
         conn.set_ex::<_, _, ()>(key.inner(), value.inner(), ttl)
-            .await?;        
+            .await?;
         Ok(())
     }
 
