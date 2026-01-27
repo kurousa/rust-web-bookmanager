@@ -16,13 +16,13 @@ use crate::{
         model::auth::{from, AuthorizationKey, AuthorizedUserId, UserItem},
         ConnectionPool,
     },
-    redis::RedisClient,
+    redis::{RedisClient, RedisClientTrait},
 };
 
 #[derive(new)]
 pub struct AuthRepositoryImpl {
     db: ConnectionPool,
-    kv: Arc<RedisClient>,
+    kv: Arc<dyn RedisClientTrait>,
     ttl: u64,
 }
 #[async_trait]
