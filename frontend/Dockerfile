@@ -16,7 +16,11 @@ WORKDIR /app
 ENV NEXT_TELEMETRY_DISABLED 1
 # depsステージからnode_modulesをコピー
 COPY --from=deps /app/node_modules ./node_modules
-COPY . .
+# 必要なファイルだけを明示的にコピー
+COPY package.json package-lock.json ./
+COPY tsconfig.json next.config.js ./
+COPY ./app ./app
+COPY ./public ./public
 
 # Next.jsのビルド実行 (standaloneモードが有効であることを前提)
 RUN npm run build
