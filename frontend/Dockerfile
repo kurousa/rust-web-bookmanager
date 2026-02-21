@@ -12,7 +12,8 @@ RUN npm ci
 # --- ステージ2: ビルド ---
 FROM node:20-alpine AS builder
 WORKDIR /app
-
+# 匿名データの収集を無効化
+ENV NEXT_TELEMETRY_DISABLED 1
 # depsステージからnode_modulesをコピー
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
@@ -26,11 +27,14 @@ WORKDIR /app
 
 # 環境変数の設定
 ENV NODE_ENV production
+ENV NEXT_TELEMETRY_DISABLED 1
+
 ARG BACKEND_HOST
 ENV BACKEND_HOST=${BACKEND_HOST}
 ARG BACKEND_PORT
 ENV BACKEND_PORT=${BACKEND_PORT}
 ENV FRONTEND_PORT 3000
+ENV PORT $FRONTEND_PORT
 
 # セキュリティ: デフォルトのnodeユーザ（uid:1000）を使用するための設定
 # WORKDIR内の所有権をnodeユーザに変更
@@ -47,7 +51,6 @@ USER node
 
 # ポートの公開
 EXPOSE $FRONTEND_PORT
-ENV PORT $FRONTEND_PORT
 
 # npm startではなく、nodeで直接起動することで軽量・高速化
 CMD ["node", "server.js"]
