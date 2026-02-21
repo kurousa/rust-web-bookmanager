@@ -24,11 +24,13 @@ ENV BACKEND_HOST=${BACKEND_HOST}
 ARG BACKEND_PORT
 ENV BACKEND_PORT=${BACKEND_PORT}
 
-COPY --from=builder /build/.next ./.next
-COPY --from=builder /build/node_modules ./node_modules
-COPY --from=builder /build/package.json ./package.json
+COPY --from=builder --chown=node:node /build/.next ./.next
+COPY --from=builder --chown=node:node /build/node_modules ./node_modules
+COPY --from=builder --chown=node:node /build/package.json ./package.json
+USER node
 
 ENV FRONTEND_PORT 3000
+
 EXPOSE $FRONTEND_PORT
 
 CMD ["npm", "run", "start"]
