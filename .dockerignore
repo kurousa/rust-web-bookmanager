@@ -1,2 +1,10 @@
 /target
 /infra
+
+node_modules
+.next
+.git
+Dockerfile
+.env*
+.DS_Store
+npm-debug.log*
