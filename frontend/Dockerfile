@@ -1,5 +1,6 @@
+ARG IMAGE_TAG=20.20.1-alpine3.22
 # --- ステージ1: 依存関係のインストール ---
-FROM node:20-alpine AS deps
+FROM node:$IMAGE_TAG AS deps
 # Alpineでネイティブ依存関係が必要な場合（libc6-compat）の追加
 # ビルドエラーの原因等によくあがるため、alpineをベースにする場合は導入が推奨される
 RUN apk add --no-cache libc6-compat
@@ -10,7 +11,7 @@ COPY package.json package-lock.json ./
 RUN npm ci
 
 # --- ステージ2: ビルド ---
-FROM node:20-alpine AS builder
+FROM node:$IMAGE_TAG AS builder
 WORKDIR /app
 # 匿名データの収集を無効化
 ENV NEXT_TELEMETRY_DISABLED 1
@@ -26,7 +27,7 @@ COPY ./public ./public
 RUN npm run build
 
 # --- ステージ3: 実行用（Runner） ---
-FROM node:20-alpine AS runner
+FROM node:$IMAGE_TAG AS runner
 WORKDIR /app
 
 # 環境変数の設定
