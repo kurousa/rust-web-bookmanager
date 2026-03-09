@@ -1,4 +1,4 @@
-ARG IMAGE_TAG=20.20.1-alpine3.22
+ARG IMAGE_TAG=20.20.1-alpine3.22@sha256:6f821baa2825178c5c65c9e65c4859d9f948254ac6650b850b61009baf26d1f5
 # --- ステージ1: 依存関係のインストール ---
 FROM node:$IMAGE_TAG AS deps
 # Alpineでネイティブ依存関係が必要な場合（libc6-compat）の追加
