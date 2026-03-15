@@ -286,7 +286,7 @@ mod tests {
             description,
             owner,
             .. // 以降のフィールドをスキップ
-        } = res.unwrap();
+        } = res?;
         assert_eq!(id, book_id);
         assert_eq!(title, "Test Title");
         assert_eq!(author, "Test Author");
@@ -301,7 +301,7 @@ mod tests {
     #[sqlx::test(fixtures("common", "book"))]
     async fn test_update_book_not_found(pool: sqlx::PgPool) -> anyhow::Result<()> {
         let repo = BookRepositoryImpl::new(ConnectionPool::new(pool.clone()));
-        let book_id = BookId::from_str("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa").unwrap(); // 存在しないBookID
+        let book_id = BookId::from_str("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa")?; // 存在しないBookID
         let book = repo.find_by_id(book_id).await?;
         assert!(book.is_none());
 
@@ -312,8 +312,8 @@ mod tests {
     async fn test_update_book_success(pool: sqlx::PgPool) -> anyhow::Result<()> {
         let repo = BookRepositoryImpl::new(ConnectionPool::new(pool.clone()));
         // fixtures/book.sqlに記載のBookIDを指定
-        let book_id = BookId::from_str("9890736e-a4e4-461a-a77d-eac3517ef11b").unwrap();
-        let book = repo.find_by_id(book_id).await?.unwrap();
+        let book_id = BookId::from_str("9890736e-a4e4-461a-a77d-eac3517ef11b")?;
+        let book = repo.find_by_id(book_id).await?.ok_or_else(|| anyhow::anyhow!("Book not found"))?;
         const NEW_AUTHOR: &str = "New Author";
         assert_ne!(book.author, NEW_AUTHOR);
 
@@ -324,11 +324,11 @@ mod tests {
             isbn: book.isbn,
             description: book.description,
             // fixtures/common.sqlに記載のユーザーIDを指定
-            requested_user: UserId::from_str("5b4c96ac-316a-4bee-8e69-cac5eb84ff4c").unwrap(),
+            requested_user: UserId::from_str("5b4c96ac-316a-4bee-8e69-cac5eb84ff4c")?;
         };
-        repo.update(update_book).await.unwrap();
+        repo.update(update_book).await?;
 
-        let book = repo.find_by_id(book_id).await?.unwrap();
+        let book = repo.find_by_id(book_id).await?.ok_or_else(|| anyhow::anyhow!("Book not found"))?;
         assert_eq!(book.author, NEW_AUTHOR);
 
         Ok(())
