@@ -100,7 +100,7 @@ async fn bootstrap() -> Result<()> {
             std::env::var("FRONTEND_URL")
                 .unwrap_or_else(|_| "http://localhost:3000".into())
                 .parse::<axum::http::HeaderValue>()
-                .context("FRONTEND_URL must be a valid header value")?
+                .unwrap(),
         );
 
     let router = Router::new().merge(v1::routes()).merge(auth::routes());
