@@ -2,6 +2,7 @@
 
 import { ACCESS_TOKEN_KEY } from "@/app/_components/auth";
 import Header from "@/app/_components/Header";
+import { useLogout } from "@/app/_contexts/user";
 import {
   Button,
   Container,
@@ -30,6 +31,7 @@ export default function UpdateUserPassword() {
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [accessToken] = useLocalStorageState(ACCESS_TOKEN_KEY);
   const router = useRouter();
+  const { logout } = useLogout();
   const toast = useToast();
 
   const {
@@ -68,7 +70,7 @@ export default function UpdateUserPassword() {
 
   return (
     <>
-      <Header></Header>
+      <Header onClickLogout={logout}></Header>
       <Container maxW="container.xl" my={20}>
         <Heading as="h2" size="2xl" mb={2}>
           パスワード変更
