@@ -16,23 +16,14 @@ import {
   useColorModeValue,
 } from "@chakra-ui/react";
 import NextLink from "next/link";
-import { useRouter } from "next/navigation";
-import useLocalStorageState from "use-local-storage-state";
-import { ACCESS_TOKEN_KEY } from "./auth";
 import { FC } from "react";
 import { useCurrentUser } from "../_contexts/user";
-import { post } from "../_lib/client";
 
-const Header: FC = () => {
-  const [accessToken] = useLocalStorageState(ACCESS_TOKEN_KEY);
-  const router = useRouter();
+type HeaderProps = {
+  onClickLogout: () => void;
+};
 
-  const onClickLogout = async () => {
-    // TODO: components内でリクエストを飛ばさないようにしたい。外からpropsで渡す。
-    await post({ destination: "/auth/logout", token: accessToken });
-    router.push("/login");
-  };
-
+const Header: FC<HeaderProps> = ({ onClickLogout }) => {
   const { currentUser } = useCurrentUser();
 
   return (

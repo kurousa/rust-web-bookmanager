@@ -24,6 +24,7 @@ import { FC } from "react";
 import NextLink from "next/link";
 import { Book } from "./_types/book";
 import { useBooks } from "./_contexts/book";
+import { useLogout } from "./_contexts/user";
 import { NextPage } from "next";
 import Pagination from "./_components/Pagination";
 
@@ -44,10 +45,11 @@ const Home: NextPage = ({
   const limit = books?.limit ?? BOOKS_PER_PAGE;
   const offset = books?.offset ?? 0;
   const total = books?.total ?? 0;
+  const { logout } = useLogout();
 
   return (
     <>
-      <Header></Header>
+      <Header onClickLogout={logout}></Header>
       <Container maxW="container.xl" my={20}>
         <Pagination limit={limit} offset={offset} total={total} />
 

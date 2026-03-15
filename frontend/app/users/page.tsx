@@ -2,17 +2,18 @@
 
 import Header from "@/app/_components/Header";
 import { Container, Heading, Stack, Text } from "@chakra-ui/react";
-import { useCurrentUser, useUsers } from "@/app/_contexts/user";
+import { useCurrentUser, useLogout, useUsers } from "@/app/_contexts/user";
 import UserTable from "@/app/_components/UserTable";
 import AddUserButton from "@/app/_components/AddUserButton";
 
 export default function ListUser() {
   const { currentUser } = useCurrentUser();
   const { users } = useUsers();
+  const { logout } = useLogout();
 
   return (
     <>
-      <Header></Header>
+      <Header onClickLogout={logout}></Header>
       <Container maxW="container.xl" my={20}>
         <Heading as="h2" size="2xl" mb={2}>
           ユーザー一覧
