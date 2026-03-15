@@ -126,7 +126,6 @@ impl BookRepository for BookRepositoryImpl {
         .map_err(AppError::DatabaseOperationError)?;
 
         // let items = rows.into_iter().map(Book::from).collect();
-        let book_ids = rows.iter().map(|book| book.book_id).collect::<Vec<_>>();
         let mut checkouts = self.find_checkouts(&book_ids).await?;
         let items = rows
             .into_iter()
