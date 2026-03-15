@@ -20,35 +20,27 @@ async fn health_check_api_200(fixture_registry: registry::MockAppRegistryExt) ->
 }
 
 #[rstest]
+#[case(true, StatusCode::OK)]
+#[case(false, StatusCode::INTERNAL_SERVER_ERROR)]
 #[tokio::test]
-async fn health_check_db_200(mut fixture_registry: registry::MockAppRegistryExt) -> anyhow::Result<()> {
-    fixture_registry.expect_health_check_repository().returning(|| {
-        let mut mock = MockHealthCheckRepository::new();
-        mock.expect_check_db().returning(|| Box::pin(async { true }));
-        Arc::new(mock)
-    });
+async fn health_check_db(
+    mut fixture_registry: registry::MockAppRegistryExt,
+    #[case] db_status: bool,
+    #[case] expected_status: StatusCode,
+) -> anyhow::Result<()> {
+    fixture_registry
+        .expect_health_check_repository()
+        .returning(move || {
+            let mut mock = MockHealthCheckRepository::new();
+            mock.expect_check_db()
+                .returning(move || Box::pin(async move { db_status }));
+            Arc::new(mock)
+        });
 
     let app = make_router(fixture_registry);
     let req = Request::get(&v1("/health/db")).body(Body::empty())?;
     let resp = app.oneshot(req).await?;
 
-    assert_eq!(resp.status(), StatusCode::OK);
-    Ok(())
-}
-
-#[rstest]
-#[tokio::test]
-async fn health_check_db_500(mut fixture_registry: registry::MockAppRegistryExt) -> anyhow::Result<()> {
-    fixture_registry.expect_health_check_repository().returning(|| {
-        let mut mock = MockHealthCheckRepository::new();
-        mock.expect_check_db().returning(|| Box::pin(async { false }));
-        Arc::new(mock)
-    });
-
-    let app = make_router(fixture_registry);
-    let req = Request::get(&v1("/health/db")).body(Body::empty())?;
-    let resp = app.oneshot(req).await?;
-
-    assert_eq!(resp.status(), StatusCode::INTERNAL_SERVER_ERROR);
+    assert_eq!(resp.status(), expected_status);
     Ok(())
 }
