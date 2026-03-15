@@ -44,8 +44,8 @@ sqlx = { version = "0.8.1", features = [ # Updated to address RUSTSEC-2024-0363
     "runtime-tokio",
     "uuid",
     "chrono",
-    # "macros", # Temporarily removed
-    # "offline", # Temporarily removed
+    # "macros",
+    # "offline",
     "postgres",
     "migrate",
 ] }

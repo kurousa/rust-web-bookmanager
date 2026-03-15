@@ -94,7 +94,12 @@ async fn bootstrap() -> Result<()> {
         // allow `GET`,`POST`,`PUT`,`DELETE` when accessing the resource
         .allow_methods([Method::GET, Method::POST, Method::PUT, Method::DELETE])
         // allow requests from any origin
-        .allow_origin(cors::Any);
+        .allow_origin(
+            std::env::var("FRONTEND_URL")
+                .unwrap_or_else(|_| "http://localhost:3000".into())
+                .parse::<axum::http::HeaderValue>()
+                .unwrap(),
+        );
 
     let router = Router::new().merge(v1::routes()).merge(auth::routes());
     // デバッグビルドの時は, ReDocによるAPIドキュメント出力を有効にする
