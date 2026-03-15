@@ -10,7 +10,9 @@ use tower::ServiceExt;
 
 #[rstest]
 #[tokio::test]
-async fn health_check_api_200(fixture_registry: registry::MockAppRegistryExt) -> anyhow::Result<()> {
+async fn health_check_api_200(
+    fixture_registry: registry::MockAppRegistryExt,
+) -> anyhow::Result<()> {
     let app = make_router(fixture_registry);
     let req = Request::get(&v1("/health")).body(Body::empty())?;
     let resp = app.oneshot(req).await?;
@@ -32,8 +34,7 @@ async fn health_check_db(
         .expect_health_check_repository()
         .returning(move || {
             let mut mock = MockHealthCheckRepository::new();
-            mock.expect_check_db()
-                .returning(move || Box::pin(async move { db_status }));
+            mock.expect_check_db().returning(move || db_status);
             Arc::new(mock)
         });
 
