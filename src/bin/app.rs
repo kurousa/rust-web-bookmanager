@@ -41,7 +41,7 @@ fn init_logger() -> Result<()> {
     let jaeger_max_packet_size =
         std::env::var("JAEGER_MAX_PACKET_SIZE").unwrap_or("8192".to_string());
     let jaeger_endpoint = format!("{}:{}", jaeger_host, jaeger_port);
-
+    tracing::debug!(jaeger.endpoint = %jaeger_endpoint, "Jaeger endpoint configured");
     global::set_text_map_propagator(opentelemetry_jaeger::Propagator::new());
     let jaeger_tracer = opentelemetry_jaeger::new_agent_pipeline()
         .with_endpoint(jaeger_endpoint)
