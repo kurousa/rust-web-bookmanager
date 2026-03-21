@@ -319,13 +319,15 @@ impl CheckoutRepository for CheckoutRepositoryImpl {
 
     // 特定蔵書の貸出履歴(返却済みも含む)を取得する
     async fn find_history_by_book_id(&self, book_id: BookId) -> AppResult<Vec<Checkout>> {
-        // 未返却の貸出を取得
-        let unreturned_co: Option<Checkout> = self.find_unreturned_by_book_id(book_id).await?;
-
-        // 返却済みの貸出し情報を取得する
-        let mut checkout_histories: Vec<Checkout> = sqlx::query_as!(
-            ReturnedCheckoutRow,
-            r#"
+        // 未返却の貸出と返却済みの貸出履歴を並行して取得する
+        let (unreturned_co_res, returned_checkout_rows_res): (
+            AppResult<Option<Checkout>>,
+            Result<Vec<ReturnedCheckoutRow>, sqlx::Error>,
+        ) = tokio::join!(
+            self.find_unreturned_by_book_id(book_id),
+            sqlx::query_as!(
+                ReturnedCheckoutRow,
+                r#"
                 SELECT
                     rc.checkout_id,
                     rc.book_id,
@@ -342,14 +344,17 @@ impl CheckoutRepository for CheckoutRepositoryImpl {
                     rc.book_id = $1
                 ORDER BY rc.returned_at DESC
             "#,
-            book_id as _,
-        )
-        .fetch_all(self.db.inner_ref())
-        .await
-        .map_err(AppError::DatabaseOperationError)?
-        .into_iter()
-        .map(Checkout::from)
-        .collect();
+                book_id as _,
+            )
+            .fetch_all(self.db.inner_ref())
+        );
+
+        let unreturned_co = unreturned_co_res?;
+        let mut checkout_histories: Vec<Checkout> = returned_checkout_rows_res
+            .map_err(AppError::DatabaseOperationError)?
+            .into_iter()
+            .map(Checkout::from)
+            .collect();
 
         // 貸出中である場合は、返却済みの履歴の先頭に追加
         if let Some(co) = unreturned_co {
