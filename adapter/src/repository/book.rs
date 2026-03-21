@@ -125,7 +125,6 @@ impl BookRepository for BookRepositoryImpl {
         .await
         .map_err(AppError::DatabaseOperationError)?;
 
-        // let items = rows.into_iter().map(Book::from).collect();
         let mut checkouts = self.find_checkouts(&book_ids).await?;
         let items = rows
             .into_iter()
