@@ -320,7 +320,10 @@ impl CheckoutRepository for CheckoutRepositoryImpl {
     // 特定蔵書の貸出履歴(返却済みも含む)を取得する
     async fn find_history_by_book_id(&self, book_id: BookId) -> AppResult<Vec<Checkout>> {
         // 未返却の貸出と返却済みの貸出履歴を並行して取得する
-        let (unreturned_co_res, returned_checkout_rows_res) = tokio::join!(
+        let (unreturned_co_res, returned_checkout_rows_res): (
+            AppResult<Option<Checkout>>,
+            Result<Vec<ReturnedCheckoutRow>, sqlx::Error>,
+        ) = tokio::join!(
             self.find_unreturned_by_book_id(book_id),
             sqlx::query_as!(
                 ReturnedCheckoutRow,

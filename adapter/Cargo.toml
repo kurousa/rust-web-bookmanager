@@ -19,3 +19,4 @@ derive-new.workspace = true
 sqlx.workspace = true
 redis.workspace = true
 anyhow.workspace = true
+tokio.workspace = true
