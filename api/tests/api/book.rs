@@ -76,6 +76,32 @@ async fn show_book_list_with_query_200(
 }
 
 #[rstest]
+#[case(r#"{"title": "", "author": "author", "isbn": "isbn", "description": "description"}"#)]
+#[case(r#"{"title": "title", "author": "", "isbn": "isbn", "description": "description"}"#)]
+#[case(r#"{"title": "title", "author": "author", "isbn": "", "description": "description"}"#)]
+#[tokio::test]
+/// Error case: Invalid payload for update_book
+async fn update_book_400(
+    fixture: registry::MockAppRegistryExt,
+    #[case] body: &str,
+) -> anyhow::Result<()> {
+    let book_id = BookId::new();
+
+    // Create the router
+    let app: axum::Router = make_router(fixture);
+
+    // Create and send the request, then verify the response status code
+    let req = Request::put(&v1(&format!("/books/{}", book_id)))
+        .header("Content-Type", "application/json")
+        .bearer()
+        .body(Body::from(body.to_owned()))?;
+    let resp = app.oneshot(req).await?;
+    assert_eq!(resp.status(), axum::http::StatusCode::BAD_REQUEST);
+
+    Ok(())
+}
+
+#[rstest]
 #[case("/books?limit=-1")]
 #[case("/books?offset=aaa")]
 #[tokio::test]
