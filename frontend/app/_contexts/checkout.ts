@@ -5,7 +5,7 @@ import { Checkout } from "../_types/book";
 export const useMyCheckouts = () => {
   const { data, error } = useSWR<{ items: Checkout[] }>(
     "/api/v1/users/me/checkouts",
-    (destination) => fetchWithToken(destination),
+    (destination: string) => fetchWithToken(destination),
   );
   return {
     checkouts: data?.items,
@@ -17,7 +17,7 @@ export const useMyCheckouts = () => {
 export const useCheckouts = () => {
   const { data, error } = useSWR<{ items: Checkout[] }>(
     "/api/v1/books/checkouts",
-    (destination) => fetchWithToken(destination),
+    (destination: string) => fetchWithToken(destination),
   );
   return {
     checkouts: data?.items,
@@ -29,7 +29,7 @@ export const useCheckouts = () => {
 export const useBookCheckouts = (bookId: string) => {
   const { data, error } = useSWR<{ items: Checkout[] }>(
     `/api/v1/books/${bookId}/checkout-history`,
-    (destination) => fetchWithToken(destination),
+    (destination: string) => fetchWithToken(destination),
   );
   return {
     checkouts: data?.items,

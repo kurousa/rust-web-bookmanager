@@ -15,7 +15,7 @@ export const useLogout = () => {
 };
 
 export const useCurrentUser = () => {
-  const { data, error } = useSWR<User>("/api/v1/users/me", (destination) =>
+  const { data, error } = useSWR<User>("/api/v1/users/me", (destination: string) =>
     fetchWithToken(destination),
   );
   return {
@@ -26,7 +26,7 @@ export const useCurrentUser = () => {
 };
 
 export const useUsers = () => {
-  const { data, error } = useSWR<Users>("/api/v1/users", (destination) =>
+  const { data, error } = useSWR<Users>("/api/v1/users", (destination: string) =>
     fetchWithToken(destination),
   );
   return {

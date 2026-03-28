@@ -10,7 +10,7 @@ type BooksQuery = {
 export const useBooks = (query: BooksQuery) => {
   const { data, error } = useSWR<PaginatedList<Book>>(
     `/api/v1/books?limit=${query.limit}&offset=${query.offset}`,
-    (destination) => fetchWithToken(destination),
+    (destination: string) => fetchWithToken(destination),
   );
   return {
     books: data,
@@ -20,7 +20,7 @@ export const useBooks = (query: BooksQuery) => {
 };
 
 export const useBook = (id: string) => {
-  const { data, error } = useSWR<Book>(`/api/v1/books/${id}`, (destination) =>
+  const { data, error } = useSWR<Book>(`/api/v1/books/${id}`, (destination: string) =>
     fetchWithToken(destination),
   );
   return {

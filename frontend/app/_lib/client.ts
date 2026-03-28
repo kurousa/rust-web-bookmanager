@@ -1,9 +1,13 @@
 export const fetchWithToken = async (destination: string) => {
-  return fetcher(destination, {
+  const res = await fetcher(destination, {
     headers: {
       "Content-Type": "application/json",
     },
-  }).then((res) => res.json());
+  });
+  if (!res.ok) {
+    throw new Error(`HTTP error! status: ${res.status}`);
+  }
+  return res.json();
 };
 
 const fetcher = async (destination: string, init: RequestInit) => {

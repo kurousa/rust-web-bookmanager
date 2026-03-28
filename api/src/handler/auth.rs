@@ -46,10 +46,7 @@ pub async fn login(
 
     Ok((
         jar.add(cookie),
-        Json(AccessTokenResponse {
-            user_id,
-            access_token: access_token.0,
-        }),
+        Json(AccessTokenResponse { user_id }),
     ))
 }
 /// ログアウト処理
@@ -76,7 +73,7 @@ pub async fn logout(
 
     let cookie = Cookie::build(("access_token", ""))
         .path("/")
-        .max_age(chrono::Duration::zero().to_std().unwrap().into())
+        .max_age(time::Duration::ZERO)
         .build();
 
     Ok((jar.add(cookie), StatusCode::NO_CONTENT))
