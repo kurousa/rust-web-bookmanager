@@ -1,6 +1,5 @@
 "use client";
 
-import { ACCESS_TOKEN_KEY } from "@/app/_components/auth";
 import Header from "@/app/_components/Header";
 import { useLogout } from "@/app/_contexts/user";
 import { post } from "@/app/_lib/client";
@@ -16,7 +15,6 @@ import {
 } from "@chakra-ui/react";
 import { useRouter } from "next/navigation";
 import { SubmitHandler, useForm } from "react-hook-form";
-import useLocalStorageState from "use-local-storage-state";
 
 type BookInput = {
   title: string;
@@ -26,7 +24,6 @@ type BookInput = {
 };
 
 export default function CreateBook() {
-  const [accessToken] = useLocalStorageState(ACCESS_TOKEN_KEY);
   const router = useRouter();
   const { logout } = useLogout();
 
@@ -39,7 +36,6 @@ export default function CreateBook() {
   const onSubmit: SubmitHandler<BookInput> = async (values) => {
     const res = await post({
       destination: "/api/v1/books",
-      token: accessToken,
       body: values,
     });
 

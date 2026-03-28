@@ -1,9 +1,7 @@
 "use client";
 
-import { ACCESS_TOKEN_KEY } from "@/app/_components/auth";
 import { Book } from "../_types/book";
 import { useRouter } from "next/navigation";
-import useLocalStorageState from "use-local-storage-state";
 import { post, put } from "../_lib/client";
 import { useCurrentUser } from "../_contexts/user";
 import { Button } from "@chakra-ui/react";
@@ -17,7 +15,6 @@ export type CheckoutButtonProps = {
 const CheckoutButton: FC<CheckoutButtonProps> = ({
   book,
 }: CheckoutButtonProps) => {
-  const [accessToken] = useLocalStorageState(ACCESS_TOKEN_KEY);
   const router = useRouter();
   const { currentUser } = useCurrentUser();
   const { mutate } = useSWRConfig();
@@ -26,12 +23,11 @@ const CheckoutButton: FC<CheckoutButtonProps> = ({
     e.preventDefault();
     const res = await post({
       destination: `/api/v1/books/${book.id}/checkouts`,
-      token: accessToken,
     });
 
     if (res.ok) {
-      mutate([`/api/v1/books/${book.id}`, accessToken]);
-      mutate([`/api/v1/books/${book.id}/checkout-history`, accessToken]);
+      mutate(`/api/v1/books/${book.id}`);
+      mutate(`/api/v1/books/${book.id}/checkout-history`);
       router.refresh();
     }
   };
@@ -40,12 +36,11 @@ const CheckoutButton: FC<CheckoutButtonProps> = ({
     e.preventDefault();
     const res = await put({
       destination: `/api/v1/books/${book.id}/checkouts/${book.checkout?.id}`,
-      token: accessToken,
     });
 
     if (res.ok) {
-      mutate([`/api/v1/books/${book.id}`, accessToken]);
-      mutate([`/api/v1/books/${book.id}/checkout-history`, accessToken]);
+      mutate(`/api/v1/books/${book.id}`);
+      mutate(`/api/v1/books/${book.id}/checkout-history`);
       router.refresh();
     }
   };

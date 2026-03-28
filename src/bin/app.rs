@@ -99,7 +99,8 @@ async fn bootstrap() -> Result<()> {
                 .unwrap_or_else(|_| "http://localhost:3000".into())
                 .parse::<axum::http::HeaderValue>()
                 .unwrap(),
-        );
+        )
+        .allow_credentials(true);
 
     let router = Router::new().merge(v1::routes()).merge(auth::routes());
     // デバッグビルドの時は, ReDocによるAPIドキュメント出力を有効にする

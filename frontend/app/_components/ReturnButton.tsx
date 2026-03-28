@@ -1,8 +1,6 @@
 "use client";
 
-import { ACCESS_TOKEN_KEY } from "@/app/_components/auth";
 import { Checkout } from "../_types/book";
-import useLocalStorageState from "use-local-storage-state";
 import { put } from "../_lib/client";
 import { Button, useToast } from "@chakra-ui/react";
 import { useSWRConfig } from "swr";
@@ -15,7 +13,6 @@ export type ReturnButtonProps = {
 const ReturnButton: FC<ReturnButtonProps> = ({
   checkout,
 }: ReturnButtonProps) => {
-  const [accessToken] = useLocalStorageState(ACCESS_TOKEN_KEY);
   const { mutate } = useSWRConfig();
   const toast = useToast();
 
@@ -23,7 +20,6 @@ const ReturnButton: FC<ReturnButtonProps> = ({
     e.preventDefault();
     const res = await put({
       destination: `/api/v1/books/${checkout.book.id}/checkouts/${checkout.id}/returned`,
-      token: accessToken,
     });
 
     if (res.ok) {
@@ -35,8 +31,8 @@ const ReturnButton: FC<ReturnButtonProps> = ({
         isClosable: true,
       });
 
-      mutate(["/api/v1/users/me/checkouts", accessToken]);
-      mutate(["/api/v1/books/checkouts", accessToken]);
+      mutate("/api/v1/users/me/checkouts");
+      mutate("/api/v1/books/checkouts");
     } else {
       toast({
         title: "蔵書を返却できませんでした",

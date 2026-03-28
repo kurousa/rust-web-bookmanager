@@ -1,6 +1,4 @@
 import { Select, useToast } from "@chakra-ui/react";
-import useLocalStorageState from "use-local-storage-state";
-import { ACCESS_TOKEN_KEY } from "./auth";
 import { User } from "../_types/user";
 import { useSWRConfig } from "swr";
 import { put } from "../_lib/client";
@@ -15,14 +13,12 @@ const UpdateUserRoleSelector: FC<UpdateUserRoleSelectorProps> = ({
   user,
   isCurrentUser,
 }: UpdateUserRoleSelectorProps) => {
-  const [accessToken] = useLocalStorageState(ACCESS_TOKEN_KEY);
   const toast = useToast();
   const { mutate } = useSWRConfig();
 
   const handleUpdateRole = async (role: string) => {
     const res = await put({
       destination: `/api/v1/users/${user.id}/role`,
-      token: accessToken,
       body: { role: role },
     });
 
@@ -35,7 +31,7 @@ const UpdateUserRoleSelector: FC<UpdateUserRoleSelectorProps> = ({
           duration: 5000,
           isClosable: true,
         });
-        mutate(["/api/v1/users", accessToken]);
+        mutate("/api/v1/users");
       } else {
         toast({
           title: "ユーザーのロールを更新できませんでした",
