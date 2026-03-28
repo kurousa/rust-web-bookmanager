@@ -70,9 +70,7 @@ pub async fn logout(
 
     let cookie = Cookie::build(("access_token", ""))
         .path("/")
-        .max_age(axum_extra::extract::cookie::Expiration::from(
-            time::Duration::ZERO,
-        ))
+        .max_age(time::Duration::ZERO)
         .build();
 
     Ok((jar.add(cookie), StatusCode::NO_CONTENT))
