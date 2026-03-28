@@ -44,10 +44,7 @@ pub async fn login(
         .path("/")
         .build();
 
-    Ok((
-        jar.add(cookie),
-        Json(AccessTokenResponse { user_id }),
-    ))
+    Ok((jar.add(cookie), Json(AccessTokenResponse { user_id })))
 }
 /// ログアウト処理
 /// ユーザーのアクセストークンを削除する
@@ -73,7 +70,9 @@ pub async fn logout(
 
     let cookie = Cookie::build(("access_token", ""))
         .path("/")
-        .max_age(time::Duration::ZERO)
+        .max_age(axum_extra::extract::cookie::Expiration::from(
+            time::Duration::ZERO,
+        ))
         .build();
 
     Ok((jar.add(cookie), StatusCode::NO_CONTENT))

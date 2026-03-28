@@ -16,6 +16,7 @@ registry.workspace = true
 axum.workspace = true
 derive-new.workspace = true
 chrono.workspace = true
+time.workspace = true
 tokio.workspace = true
 tracing.workspace = true
 tower.workspace = true
