@@ -1,4 +1,3 @@
-import { ACCESS_TOKEN_KEY } from "@/app/_components/auth";
 import React, { FC, useState } from "react";
 import {
   Modal,
@@ -18,7 +17,6 @@ import {
   useToast,
   FormErrorMessage,
 } from "@chakra-ui/react";
-import useLocalStorageState from "use-local-storage-state";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { post } from "../_lib/client";
 import { useSWRConfig } from "swr";
@@ -33,7 +31,6 @@ const AddUserButton: FC = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [userInput, setUserInput] = useState<UserInput | null>(null);
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false); // 成功メッセージモーダルの表示制御
-  const [accessToken] = useLocalStorageState(ACCESS_TOKEN_KEY);
   const toast = useToast();
   const { mutate } = useSWRConfig();
 
@@ -47,7 +44,6 @@ const AddUserButton: FC = () => {
   const onSubmit: SubmitHandler<UserInput> = async (values) => {
     const res = await post({
       destination: "/api/v1/users",
-      token: accessToken,
       body: values,
     });
 
@@ -56,7 +52,7 @@ const AddUserButton: FC = () => {
       reset();
       onClose();
       setIsSuccessModalOpen(true);
-      mutate(["/api/v1/users", accessToken]);
+      mutate("/api/v1/users");
     } else {
       toast({
         title: "ユーザーを作成できませんでした",

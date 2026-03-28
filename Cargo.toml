@@ -58,7 +58,7 @@ bcrypt = "0.15.0"
 itertools = "0.11.0"
 tower = { version = "0.4.13", features = ["full"] }
 tracing = { version = "0.1.37", features = ["log"] }
-axum-extra = { version = "0.9.3", features = ["typed-header"] }
+axum-extra = { version = "0.9.3", features = ["typed-header", "cookie"] }
 tokio-stream = "0.1.14"
 garde = { version = "0.18.0", features = [
     "derive",

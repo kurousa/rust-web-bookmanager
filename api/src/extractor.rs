@@ -1,8 +1,5 @@
-use axum::{async_trait, extract::FromRequestParts, http::request::Parts, RequestPartsExt};
-use axum_extra::{
-    headers::{authorization::Bearer, Authorization},
-    TypedHeader,
-};
+use axum::{async_trait, extract::FromRequestParts, http::request::Parts};
+use axum_extra::extract::CookieJar;
 use kernel::model::{auth::AccessToken, id::UserId, role::Role, user::User};
 use registry::AppRegistry;
 use shared::error::AppError;
@@ -29,12 +26,14 @@ impl FromRequestParts<AppRegistry> for AuthorizedUser {
         parts: &mut Parts,
         registry: &AppRegistry,
     ) -> Result<Self, Self::Rejection> {
-        // HTTPヘッダー"Authorization"からトークン(Bearer)を取得
-        let TypedHeader(Authorization(bearer)) = parts
-            .extract::<TypedHeader<Authorization<Bearer>>>()
+        let jar = CookieJar::from_request_parts(parts, registry)
             .await
             .map_err(|_| AppError::UnauthorizedError)?;
-        let access_token = AccessToken(bearer.token().to_string());
+
+        let access_token = jar
+            .get("access_token")
+            .map(|cookie| AccessToken(cookie.value().to_string()))
+            .ok_or(AppError::UnauthorizedError)?;
 
         // トークンからユーザーIDを取得
         let user_id = registry

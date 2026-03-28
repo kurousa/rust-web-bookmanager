@@ -1,6 +1,5 @@
 "use client";
 
-import { ACCESS_TOKEN_KEY } from "@/app/_components/auth";
 import Header from "@/app/_components/Header";
 import { useBook } from "@/app/_contexts/book";
 import { useLogout } from "@/app/_contexts/user";
@@ -17,14 +16,12 @@ import {
 } from "@chakra-ui/react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import useLocalStorageState from "use-local-storage-state";
 
 export default function EditBook({
   params,
 }: Readonly<{
   params: { id: string };
 }>) {
-  const [accessToken] = useLocalStorageState(ACCESS_TOKEN_KEY);
   const router = useRouter();
   const { logout } = useLogout();
 
@@ -49,7 +46,6 @@ export default function EditBook({
     e.preventDefault();
     const res = await put({
       destination: `/api/v1/books/${params.id}`,
-      token: accessToken,
       body: input,
     });
 

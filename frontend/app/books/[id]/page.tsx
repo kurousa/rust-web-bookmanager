@@ -1,6 +1,5 @@
 "use client";
 
-import { ACCESS_TOKEN_KEY } from "@/app/_components/auth";
 import Header from "@/app/_components/Header";
 import { DeleteIcon, EditIcon } from "@chakra-ui/icons";
 import {
@@ -24,7 +23,6 @@ import {
 } from "@chakra-ui/react";
 import { useRouter } from "next/navigation";
 import { useRef } from "react";
-import useLocalStorageState from "use-local-storage-state";
 import NextLink from "next/link";
 import { useBook } from "@/app/_contexts/book";
 import { useLogout } from "@/app/_contexts/user";
@@ -33,7 +31,6 @@ import CheckoutButton from "@/app/_components/CheckoutButton";
 import CheckoutHistory from "@/app/_components/CheckoutHistory";
 
 export default function Page({ params }: Readonly<{ params: { id: string } }>) {
-  const [accessToken] = useLocalStorageState(ACCESS_TOKEN_KEY);
   const router = useRouter();
   const { logout } = useLogout();
   const {
@@ -49,7 +46,6 @@ export default function Page({ params }: Readonly<{ params: { id: string } }>) {
     e.preventDefault();
     const res = await del({
       destination: `/api/v1/books/${params.id}`,
-      token: accessToken,
     });
     if (res.ok) {
       router.push("/");
