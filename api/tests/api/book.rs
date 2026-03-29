@@ -63,7 +63,7 @@ async fn show_book_list_with_query_200(
     let app: axum::Router = make_router(fixture);
 
     // リクエストを作成・送信し、レスポンスのステータスコードを検証
-    let req = Request::get(&v1(path)).bearer().body(Body::empty())?;
+    let req = Request::get(&v1(path)).cookie().body(Body::empty())?;
     let resp = app.oneshot(req).await?;
     assert_eq!(resp.status(), axum::http::StatusCode::OK);
 
@@ -117,7 +117,7 @@ async fn show_book_list_with_query_400(
     let app: axum::Router = make_router(fixture);
 
     // リクエストを作成・送信し、レスポンスのステータスコードを検証
-    let req = Request::get(&v1(path)).bearer().body(Body::empty())?;
+    let req = Request::get(&v1(path)).cookie().body(Body::empty())?;
     let resp = app.oneshot(req).await?;
     assert_eq!(resp.status(), axum::http::StatusCode::BAD_REQUEST);
 

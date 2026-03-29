@@ -64,11 +64,16 @@ pub fn fixture(mut fixture_auth: MockAppRegistryExt) -> MockAppRegistryExt {
 
 pub trait TestRequestExt {
     fn bearer(self) -> Builder;
+    fn cookie(self) -> Builder;
 }
 
 impl TestRequestExt for Builder {
     fn bearer(self) -> Builder {
         self.header("Authorization", "Bearer dummy")
+    }
+
+    fn cookie(self) -> Builder {
+        self.header("Cookie", "access_token=dummy")
     }
 }
 
