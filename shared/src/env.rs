@@ -82,10 +82,22 @@ mod tests {
     #[test]
     fn test_environment_from_str() {
         use std::str::FromStr;
-        assert_eq!(Environment::from_str("development"), Ok(Environment::Development));
-        assert_eq!(Environment::from_str("production"), Ok(Environment::Production));
-        assert_eq!(Environment::from_str("DEVELOPMENT"), Ok(Environment::Development));
-        assert_eq!(Environment::from_str("PRODUCTION"), Ok(Environment::Production));
+        assert_eq!(
+            Environment::from_str("development"),
+            Ok(Environment::Development)
+        );
+        assert_eq!(
+            Environment::from_str("production"),
+            Ok(Environment::Production)
+        );
+        assert_eq!(
+            Environment::from_str("DEVELOPMENT"),
+            Ok(Environment::Development)
+        );
+        assert_eq!(
+            Environment::from_str("PRODUCTION"),
+            Ok(Environment::Production)
+        );
         assert!(Environment::from_str("invalid").is_err());
     }
 }
