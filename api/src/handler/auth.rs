@@ -1,4 +1,6 @@
 use axum::{extract::State, http::StatusCode, Json};
+use axum_extra::extract::cookie::{Cookie, SameSite};
+use axum_extra::extract::CookieJar;
 use kernel::model::auth::event::CreateToken;
 use registry::AppRegistry;
 use shared::error::AppResult;
@@ -23,8 +25,9 @@ use crate::{
 )]
 pub async fn login(
     State(registry): State<AppRegistry>,
+    jar: CookieJar,
     Json(req): Json<LoginRequest>,
-) -> AppResult<Json<AccessTokenResponse>> {
+) -> AppResult<(CookieJar, Json<AccessTokenResponse>)> {
     let user_id = registry
         .auth_repository()
         .verify_user(&req.email, &req.password)
@@ -34,10 +37,14 @@ pub async fn login(
         .create_token(CreateToken::new(user_id))
         .await?;
 
-    Ok(Json(AccessTokenResponse {
-        user_id,
-        access_token: access_token.0,
-    }))
+    let cookie = Cookie::build(("access_token", access_token.0.clone()))
+        .http_only(true)
+        .secure(true)
+        .same_site(SameSite::Lax)
+        .path("/")
+        .build();
+
+    Ok((jar.add(cookie), Json(AccessTokenResponse { user_id })))
 }
 /// ログアウト処理
 /// ユーザーのアクセストークンを削除する
@@ -54,10 +61,17 @@ pub async fn login(
 pub async fn logout(
     user: AuthorizedUser,
     State(registry): State<AppRegistry>,
-) -> AppResult<StatusCode> {
+    jar: CookieJar,
+) -> AppResult<(CookieJar, StatusCode)> {
     registry
         .auth_repository()
         .delete_token(user.access_token)
         .await?;
-    Ok(StatusCode::NO_CONTENT)
+
+    let cookie = Cookie::build(("access_token", ""))
+        .path("/")
+        .max_age(time::Duration::ZERO)
+        .build();
+
+    Ok((jar.add(cookie), StatusCode::NO_CONTENT))
 }

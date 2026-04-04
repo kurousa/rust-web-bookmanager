@@ -1,23 +1,27 @@
-export const fetchWithToken = async (
-  destination: string,
-  token: string | unknown,
-) => {
-  return fetcher(destination, {
+export const fetchWithToken = async (destination: string) => {
+  const res = await fetcher(destination, {
     headers: {
-      Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
     },
-  }).then((res) => res.json());
+  });
+  if (!res.ok) {
+    throw new Error(`HTTP error! status: ${res.status}`);
+  }
+  return res.json();
 };
 
 const fetcher = async (destination: string, init: RequestInit) => {
   const res = await fetch(
-    `${process.env.API_ROOT_PROTOCOL ?? "http"}://${process.env.API_ROOT_URL?.replace(/\/$/g, "") ?? "localhost"
+    `${process.env.API_ROOT_PROTOCOL ?? "http"}://${
+      process.env.API_ROOT_URL?.replace(/\/$/g, "") ?? "localhost"
     }:${process.env.API_ROOT_PORT ?? "8080"}/${destination.replace(
       /^\//g,
       "",
     )}`,
-    init,
+    {
+      ...init,
+      credentials: "include",
+    },
   );
 
   return res;
@@ -25,7 +29,6 @@ const fetcher = async (destination: string, init: RequestInit) => {
 
 type RequestInfo<T> = {
   destination: string;
-  token?: string | unknown;
   body?: T;
 };
 
@@ -33,12 +36,9 @@ const sender = async <T>(
   info: RequestInfo<T>,
   method: "POST" | "PUT" | "DELETE",
 ) => {
-  const basicHeaders = {
+  const headers = {
     "Content-Type": "application/json",
   };
-  const headers = info.token
-    ? { Authorization: `Bearer ${info.token}`, ...basicHeaders }
-    : basicHeaders;
   const basicInit = {
     method: method,
     headers: headers,

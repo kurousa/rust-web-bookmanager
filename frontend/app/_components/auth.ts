@@ -1,11 +1,15 @@
 import { redirect } from "next/navigation";
 import { FC } from "react";
-import useLocalStorageState from "use-local-storage-state";
+import { useCurrentUser } from "../_contexts/user";
 
 const AuthProvider: FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [accessToken] = useLocalStorageState(ACCESS_TOKEN_KEY);
+  const { currentUser, isLoading, isError } = useCurrentUser();
 
-  if (accessToken === undefined) {
+  if (isLoading) {
+    return null;
+  }
+
+  if (isError || !currentUser) {
     redirect("/login");
   }
 
@@ -13,11 +17,3 @@ const AuthProvider: FC<{ children: React.ReactNode }> = ({ children }) => {
 };
 
 export default AuthProvider;
-
-export const ACCESS_TOKEN_KEY = (() => {
-  const key = process.env.NEXT_PUBLIC_ACCESS_TOKEN_KEY;
-  if (!key) {
-    throw new Error("NEXT_PUBLIC_ACCESS_TOKEN_KEY is not defined");
-  }
-  return key;
-})();

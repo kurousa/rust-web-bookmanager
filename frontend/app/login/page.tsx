@@ -20,8 +20,6 @@ import {
 import { useState } from "react";
 import { ViewIcon, ViewOffIcon } from "@chakra-ui/icons";
 import { useRouter } from "next/navigation";
-import { ACCESS_TOKEN_KEY } from "../_components/auth";
-import useLocalStorageState from "use-local-storage-state";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { post } from "../_lib/client";
 
@@ -34,7 +32,6 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const router = useRouter();
-  const [_accessToken, setAccessToken] = useLocalStorageState(ACCESS_TOKEN_KEY);
 
   const {
     handleSubmit,
@@ -46,8 +43,6 @@ export default function Login() {
     const res = await post({ destination: "/auth/login", body: input });
 
     if (res.ok) {
-      const json = await res.json();
-      setAccessToken(json.accessToken);
       router.push("/");
     } else {
       setError("メールアドレスまたはパスワードが間違っています。");

@@ -1,6 +1,5 @@
 "use client";
 
-import { ACCESS_TOKEN_KEY } from "@/app/_components/auth";
 import Header from "@/app/_components/Header";
 import { useLogout } from "@/app/_contexts/user";
 import {
@@ -18,7 +17,6 @@ import { useState } from "react";
 import { ViewIcon, ViewOffIcon } from "@chakra-ui/icons";
 import { useRouter } from "next/navigation";
 import { SubmitHandler, useForm } from "react-hook-form";
-import useLocalStorageState from "use-local-storage-state";
 import { put } from "@/app/_lib/client";
 
 type UserPasswordInput = {
@@ -29,7 +27,6 @@ type UserPasswordInput = {
 export default function UpdateUserPassword() {
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
-  const [accessToken] = useLocalStorageState(ACCESS_TOKEN_KEY);
   const router = useRouter();
   const { logout } = useLogout();
   const toast = useToast();
@@ -43,7 +40,6 @@ export default function UpdateUserPassword() {
   const onSubmit: SubmitHandler<UserPasswordInput> = async (values) => {
     const res = await put({
       destination: "/api/v1/users/me/password",
-      token: accessToken,
       body: values,
     });
 

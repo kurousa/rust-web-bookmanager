@@ -1,5 +1,4 @@
 import { FC, useRef } from "react";
-import { ACCESS_TOKEN_KEY } from "./auth";
 import {
   AlertDialog,
   AlertDialogBody,
@@ -13,7 +12,6 @@ import {
   useToast,
 } from "@chakra-ui/react";
 import { DeleteIcon } from "@chakra-ui/icons";
-import useLocalStorageState from "use-local-storage-state";
 import { User } from "../_types/user";
 import { del } from "../_lib/client";
 import { useSWRConfig } from "swr";
@@ -25,7 +23,6 @@ type DeleteUserButtonProps = {
 const DeleteUserButton: FC<DeleteUserButtonProps> = ({
   user,
 }: DeleteUserButtonProps) => {
-  const [accessToken] = useLocalStorageState(ACCESS_TOKEN_KEY);
   const { isOpen, onOpen, onClose } = useDisclosure({ id: "delete-book" });
   const toast = useToast();
   const cancelRef = useRef(null);
@@ -34,7 +31,6 @@ const DeleteUserButton: FC<DeleteUserButtonProps> = ({
   const handleDelete = async () => {
     const res = await del({
       destination: `/api/v1/users/${user.id}`,
-      token: accessToken,
     });
 
     if (res.ok) {
@@ -46,7 +42,7 @@ const DeleteUserButton: FC<DeleteUserButtonProps> = ({
         isClosable: true,
       });
       onClose();
-      mutate(["/api/v1/users", accessToken]);
+      mutate("/api/v1/users");
     } else {
       toast({
         title: "ユーザーを削除できませんでした",
