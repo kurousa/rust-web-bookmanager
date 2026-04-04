@@ -76,8 +76,8 @@ mod tests {
     #[sqlx::test]
     async fn test_con() -> anyhow::Result<()> {
         let config = RedisConfig {
-            host: std::env::var("REDIS_HOST").unwrap(),
-            port: std::env::var("REDIS_PORT").unwrap().parse().unwrap(),
+            host: std::env::var("REDIS_HOST")?,
+            port: std::env::var("REDIS_PORT")?.parse()?,
         };
         let client = RedisClient::new(&config)?;
 
