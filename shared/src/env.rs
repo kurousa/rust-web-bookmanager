@@ -1,8 +1,8 @@
 use std::env;
 use strum::EnumString;
 
-#[derive(Default, EnumString)]
-#[strum(serialize_all = "lowercase")]
+#[derive(Debug, PartialEq, Eq, Default, EnumString)]
+#[strum(serialize_all = "lowercase", ascii_case_insensitive)]
 pub enum Environment {
     #[default]
     Development,
@@ -28,5 +28,76 @@ pub fn which() -> Environment {
     match env::var("ENV") {
         Err(_) => default_env,
         Ok(v) => v.parse().unwrap_or(default_env),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::sync::Mutex;
+
+    // 環境変数はプロセスグローバルなので、並列実行されると競合する
+    // そのため、Mutexで保護して直列化する
+    static ENV_MUTEX: Mutex<()> = Mutex::new(());
+
+    #[test]
+    fn test_which_development() {
+        let _lock = ENV_MUTEX.lock().unwrap();
+        env::set_var("ENV", "development");
+        assert_eq!(which(), Environment::Development);
+        env::remove_var("ENV");
+    }
+
+    #[test]
+    fn test_which_production() {
+        let _lock = ENV_MUTEX.lock().unwrap();
+        env::set_var("ENV", "production");
+        assert_eq!(which(), Environment::Production);
+        env::remove_var("ENV");
+    }
+
+    #[test]
+    fn test_which_invalid_env() {
+        let _lock = ENV_MUTEX.lock().unwrap();
+        env::set_var("ENV", "invalid");
+        // 無効な値の場合は、ビルドプロファイルに応じたデフォルト値が返る
+        #[cfg(debug_assertions)]
+        assert_eq!(which(), Environment::Development);
+        #[cfg(not(debug_assertions))]
+        assert_eq!(which(), Environment::Production);
+        env::remove_var("ENV");
+    }
+
+    #[test]
+    fn test_which_no_env() {
+        let _lock = ENV_MUTEX.lock().unwrap();
+        env::remove_var("ENV");
+        // ENV未指定の場合は、ビルドプロファイルに応じたデフォルト値が返る
+        #[cfg(debug_assertions)]
+        assert_eq!(which(), Environment::Development);
+        #[cfg(not(debug_assertions))]
+        assert_eq!(which(), Environment::Production);
+    }
+
+    #[test]
+    fn test_environment_from_str() {
+        use std::str::FromStr;
+        assert_eq!(
+            Environment::from_str("development"),
+            Ok(Environment::Development)
+        );
+        assert_eq!(
+            Environment::from_str("production"),
+            Ok(Environment::Production)
+        );
+        assert_eq!(
+            Environment::from_str("DEVELOPMENT"),
+            Ok(Environment::Development)
+        );
+        assert_eq!(
+            Environment::from_str("PRODUCTION"),
+            Ok(Environment::Production)
+        );
+        assert!(Environment::from_str("invalid").is_err());
     }
 }
