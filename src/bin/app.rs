@@ -15,7 +15,7 @@ use registry::AppRegistryImpl;
 use shared::config::AppConfig;
 use tokio::net::TcpListener;
 use tower_http::{
-    cors::{self, CorsLayer},
+    cors::CorsLayer,
     trace::{DefaultMakeSpan, DefaultOnRequest, DefaultOnResponse, TraceLayer},
     LatencyUnit,
 };
@@ -96,7 +96,7 @@ async fn bootstrap() -> Result<()> {
         .allow_headers([header::AUTHORIZATION, header::CONTENT_TYPE])
         // allow `GET`,`POST`,`PUT`,`DELETE` when accessing the resource
         .allow_methods([Method::GET, Method::POST, Method::PUT, Method::DELETE])
-        // allow requests from any origin
+        // allow requests from the specified origin
         .allow_origin(
             std::env::var("FRONTEND_URL")
                 .unwrap_or_else(|_| "http://localhost:3000".into())
