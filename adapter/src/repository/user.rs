@@ -79,7 +79,7 @@ impl UserRepository for UserRepositoryImpl {
 
     async fn create(&self, event: CreateUser) -> AppResult<User> {
         let user_id = UserId::new();
-        let hashed_password = hash_password(&event.password)?;
+        let hashed_password = hash_password(&event.password).await?;
         let role = Role::User;
 
         let res = sqlx::query!(
@@ -127,10 +127,10 @@ impl UserRepository for UserRepositoryImpl {
         .password_hash;
 
         // 現在のパスワードが正しいか検証
-        verify_password(&event.current_password, &original_password_hash)?;
+        verify_password(&event.current_password, &original_password_hash).await?;
 
         // 新しいパスワードのハッシュ値で更新
-        let new_password_hash = hash_password(&event.new_password)?;
+        let new_password_hash = hash_password(&event.new_password).await?;
         sqlx::query!(
             r#"
                 UPDATE users SET password_hash = $2 WHERE user_id = $1;
@@ -189,12 +189,23 @@ impl UserRepository for UserRepositoryImpl {
     }
 }
 
-fn hash_password(password: &str) -> AppResult<String> {
-    bcrypt::hash(password, bcrypt::DEFAULT_COST).map_err(AppError::from)
+async fn hash_password(password: &str) -> AppResult<String> {
+    let password = password.to_string();
+    tokio::task::spawn_blocking(move || {
+        bcrypt::hash(password, bcrypt::DEFAULT_COST).map_err(AppError::from)
+    })
+    .await
+    .map_err(|e| AppError::InternalError(e.into()))?
 }
 
-fn verify_password(password: &str, hash: &str) -> AppResult<()> {
-    if !bcrypt::verify(password, hash)? {
+async fn verify_password(password: &str, hash: &str) -> AppResult<()> {
+    let password = password.to_string();
+    let hash = hash.to_string();
+    let valid = tokio::task::spawn_blocking(move || bcrypt::verify(password, &hash))
+        .await
+        .map_err(|e| AppError::InternalError(e.into()))??;
+
+    if !valid {
         return Err(AppError::UnauthenticatedError);
     }
     Ok(())
