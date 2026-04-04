@@ -6,7 +6,10 @@ use std::{
 use adapter::{database::connect_database_with, redis::RedisClient};
 use anyhow::{Context, Result};
 use api::route::{auth, v1};
-use axum::{http::Method, Router};
+use axum::{
+    http::{header, Method},
+    Router,
+};
 use opentelemetry::global;
 use registry::AppRegistryImpl;
 use shared::config::AppConfig;
@@ -89,8 +92,8 @@ async fn bootstrap() -> Result<()> {
     // registryの初期化
     let registry = Arc::new(AppRegistryImpl::new(pool, kv, app_config));
     let cors = CorsLayer::new()
-        // allow Any headers when accessing the resource
-        .allow_headers(cors::Any)
+        // allow `Authorization` and `Content-Type` headers when accessing the resource
+        .allow_headers([header::AUTHORIZATION, header::CONTENT_TYPE])
         // allow `GET`,`POST`,`PUT`,`DELETE` when accessing the resource
         .allow_methods([Method::GET, Method::POST, Method::PUT, Method::DELETE])
         // allow requests from any origin
