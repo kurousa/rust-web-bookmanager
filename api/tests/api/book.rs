@@ -77,12 +77,13 @@ async fn show_book_list_with_query_200(
 }
 
 #[rstest]
+#[tokio::test]
 async fn delete_book_204(mut fixture: registry::MockAppRegistryExt) -> anyhow::Result<()> {
     let book_id = BookId::new();
 
     fixture.expect_book_repository().returning(move || {
         let mut mock = MockBookRepository::new();
-        mock.expect_delete().once().returning(|_| Ok(()));
+        mock.expect_delete().returning(|_| Ok(()));
         Arc::new(mock)
     });
 
@@ -99,13 +100,13 @@ async fn delete_book_204(mut fixture: registry::MockAppRegistryExt) -> anyhow::R
 }
 
 #[rstest]
+#[tokio::test]
 async fn delete_book_404(mut fixture: registry::MockAppRegistryExt) -> anyhow::Result<()> {
     let book_id = BookId::new();
 
     fixture.expect_book_repository().returning(move || {
         let mut mock = MockBookRepository::new();
         mock.expect_delete()
-            .once()
             .returning(|_| Err(AppError::NotFoundError("Not Found".into())));
         Arc::new(mock)
     });
