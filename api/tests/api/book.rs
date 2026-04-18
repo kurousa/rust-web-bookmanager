@@ -105,6 +105,7 @@ async fn delete_book_404(mut fixture: registry::MockAppRegistryExt) -> anyhow::R
     fixture.expect_book_repository().returning(move || {
         let mut mock = MockBookRepository::new();
         mock.expect_delete()
+            .once()
             .returning(|_| Err(AppError::NotFoundError("Not Found".into())));
         Arc::new(mock)
     });
