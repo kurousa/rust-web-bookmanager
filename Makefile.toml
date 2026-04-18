@@ -1,13 +1,13 @@
 [config]
 # Rustワークスペース内に作成する各クレートごとの実行を無効化
 default_to_workspace = false
+dotenv_load = true
 
 # 全体共通の環境変数定義
 [env]
 HOST = "0.0.0.0"
 PORT = 8080
 DATABASE_USERNAME = "app"
-DATABASE_PASSWORD = "passwd"
 DATABASE_NAME = "app"
 DATABASE_PORT_OUTER = 5432
 DATABASE_PORT_INNER = 5432
