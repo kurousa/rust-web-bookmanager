@@ -1,12 +1,18 @@
 use std::env;
 use strum::EnumString;
 
-#[derive(Debug, PartialEq, Eq, Default, EnumString)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, EnumString)]
 #[strum(serialize_all = "lowercase", ascii_case_insensitive)]
 pub enum Environment {
     #[default]
     Development,
     Production,
+}
+
+impl Environment {
+    pub fn is_production(&self) -> bool {
+        matches!(self, Environment::Production)
+    }
 }
 
 /// 環境判別を行い、Enum `Environment`を返す
@@ -31,18 +37,27 @@ pub fn which() -> Environment {
     }
 }
 
+/// 本番環境かどうかを判定する
+pub fn is_prod() -> bool {
+    which().is_production()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::sync::Mutex;
+    use std::sync::{Mutex, MutexGuard};
 
     // 環境変数はプロセスグローバルなので、並列実行されると競合する
     // そのため、Mutexで保護して直列化する
     static ENV_MUTEX: Mutex<()> = Mutex::new(());
 
+    fn lock_env() -> MutexGuard<'static, ()> {
+        ENV_MUTEX.lock().unwrap_or_else(|e| e.into_inner())
+    }
+
     #[test]
     fn test_which_development() {
-        let _lock = ENV_MUTEX.lock().unwrap();
+        let _lock = lock_env();
         env::set_var("ENV", "development");
         assert_eq!(which(), Environment::Development);
         env::remove_var("ENV");
@@ -50,7 +65,7 @@ mod tests {
 
     #[test]
     fn test_which_production() {
-        let _lock = ENV_MUTEX.lock().unwrap();
+        let _lock = lock_env();
         env::set_var("ENV", "production");
         assert_eq!(which(), Environment::Production);
         env::remove_var("ENV");
@@ -58,7 +73,7 @@ mod tests {
 
     #[test]
     fn test_which_invalid_env() {
-        let _lock = ENV_MUTEX.lock().unwrap();
+        let _lock = lock_env();
         env::set_var("ENV", "invalid");
         // 無効な値の場合は、ビルドプロファイルに応じたデフォルト値が返る
         #[cfg(debug_assertions)]
@@ -70,7 +85,7 @@ mod tests {
 
     #[test]
     fn test_which_no_env() {
-        let _lock = ENV_MUTEX.lock().unwrap();
+        let _lock = lock_env();
         env::remove_var("ENV");
         // ENV未指定の場合は、ビルドプロファイルに応じたデフォルト値が返る
         #[cfg(debug_assertions)]
@@ -99,5 +114,15 @@ mod tests {
             Ok(Environment::Production)
         );
         assert!(Environment::from_str("invalid").is_err());
+    }
+
+    #[test]
+    fn test_is_prod() {
+        let _lock = lock_env();
+        env::set_var("ENV", "production");
+        assert!(is_prod());
+        env::set_var("ENV", "development");
+        assert!(!is_prod());
+        env::remove_var("ENV");
     }
 }
