@@ -99,7 +99,6 @@ async fn delete_book_204(mut fixture: registry::MockAppRegistryExt) -> anyhow::R
 }
 
 #[rstest]
-#[tokio::test]
 async fn delete_book_404(mut fixture: registry::MockAppRegistryExt) -> anyhow::Result<()> {
     let book_id = BookId::new();
 
