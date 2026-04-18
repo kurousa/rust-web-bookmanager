@@ -82,7 +82,7 @@ async fn delete_book_204(mut fixture: registry::MockAppRegistryExt) -> anyhow::R
 
     fixture.expect_book_repository().returning(move || {
         let mut mock = MockBookRepository::new();
-        mock.expect_delete().returning(|_| Ok(()));
+        mock.expect_delete().once().returning(|_| Ok(()));
         Arc::new(mock)
     });
 
