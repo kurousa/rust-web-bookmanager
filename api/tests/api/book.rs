@@ -77,7 +77,6 @@ async fn show_book_list_with_query_200(
 }
 
 #[rstest]
-#[tokio::test]
 async fn delete_book_204(mut fixture: registry::MockAppRegistryExt) -> anyhow::Result<()> {
     let book_id = BookId::new();
 
