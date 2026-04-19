@@ -24,6 +24,7 @@ publish = false
 license = "MIT"
 
 [workspace.dependencies]
+serde_json = "1.0.105"
 adapter = { path = "./adapter" }
 api = { path = "./api" }
 kernel = { path = "./kernel" }
@@ -52,6 +53,7 @@ sqlx = { version = "0.8.1", features = [ # Updated to address RUSTSEC-2024-0363
 strum = { version = "0.26.2", features = ["derive"] }
 thiserror = "1.0.44"
 tokio = { version = "1.38.0", features = ["full"] } # Updated tokio
+rstest = "0.25.0"
 mockall = "0.11.4"
 redis = { version = "0.25.3", features = ["tokio-rustls-comp"] }
 bcrypt = "0.15.0"
@@ -94,4 +96,4 @@ debug = 0
 opt-level = 3
 
 [dev-dependencies]
-rstest = "0.25.0"
+rstest.workspace = true

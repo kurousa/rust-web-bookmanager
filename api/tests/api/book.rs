@@ -14,6 +14,7 @@ use kernel::{
     repository::book::MockBookRepository,
 };
 use rstest::rstest;
+use shared::error::AppError;
 use std::sync::Arc;
 use tower::ServiceExt;
 
@@ -71,6 +72,53 @@ async fn show_book_list_with_query_200(
     let result = deserialize_json!(resp, PaginatedBookResponse);
     assert_eq!(result.limit, expected_limit);
     assert_eq!(result.offset, expected_offset);
+
+    Ok(())
+}
+
+#[rstest]
+#[tokio::test]
+async fn delete_book_204(mut fixture: registry::MockAppRegistryExt) -> anyhow::Result<()> {
+    let book_id = BookId::new();
+
+    fixture.expect_book_repository().returning(move || {
+        let mut mock = MockBookRepository::new();
+        mock.expect_delete().returning(|_| Ok(()));
+        Arc::new(mock)
+    });
+
+    let app = make_router(fixture);
+
+    let req = Request::delete(&v1(&format!("/books/{}", book_id)))
+        .bearer()
+        .body(Body::empty())?;
+    let resp = app.oneshot(req).await?;
+
+    assert_eq!(resp.status(), axum::http::StatusCode::NO_CONTENT);
+
+    Ok(())
+}
+
+#[rstest]
+#[tokio::test]
+async fn delete_book_404(mut fixture: registry::MockAppRegistryExt) -> anyhow::Result<()> {
+    let book_id = BookId::new();
+
+    fixture.expect_book_repository().returning(move || {
+        let mut mock = MockBookRepository::new();
+        mock.expect_delete()
+            .returning(|_| Err(AppError::NotFoundError("Not Found".into())));
+        Arc::new(mock)
+    });
+
+    let app = make_router(fixture);
+
+    let req = Request::delete(&v1(&format!("/books/{}", book_id)))
+        .bearer()
+        .body(Body::empty())?;
+    let resp = app.oneshot(req).await?;
+
+    assert_eq!(resp.status(), axum::http::StatusCode::NOT_FOUND);
 
     Ok(())
 }
