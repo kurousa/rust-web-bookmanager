@@ -10,7 +10,6 @@ name = "api"
 path = "src/lib.rs"
 
 [dependencies]
-async-std.workspace = true
 kernel.workspace = true
 shared.workspace = true
 registry.workspace = true
