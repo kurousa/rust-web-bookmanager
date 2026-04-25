@@ -1,4 +1,4 @@
-use crate::helper::{fixture, make_router, v1, TestRequestExt};
+use crate::helper::{fixture, fixture_auth, fixture_registry, make_router, v1, TestRequestExt};
 use axum::{body::Body, http::Request};
 use rstest::rstest;
 use tower::ServiceExt;
