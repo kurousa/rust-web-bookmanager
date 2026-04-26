@@ -9,7 +9,8 @@ import {
 } from "@chakra-ui/react";
 import { useBookCheckouts } from "../_contexts/checkout";
 import { useUsers } from "../_contexts/user";
-import { FC } from "react";
+import { User } from "../_types/user";
+import { FC, useMemo } from "react";
 
 type CheckoutHistoryProps = {
   bookId: string;
@@ -21,6 +22,14 @@ const CheckoutHistory: FC<CheckoutHistoryProps> = ({
   const { checkouts } = useBookCheckouts(bookId);
   const { users } = useUsers();
   const userItems = users?.items;
+
+  const userMap = useMemo(() => {
+    const map = new Map<string, User>();
+    userItems?.forEach((user) => {
+      map.set(user.id, user);
+    });
+    return map;
+  }, [userItems]);
 
   return (
     <TableContainer>
@@ -37,9 +46,7 @@ const CheckoutHistory: FC<CheckoutHistoryProps> = ({
             <Tr key={co.id}>
               <Td>{co.checkedOutAt}</Td>
               <Td>{co.returnedAt ?? "-"}</Td>
-              <Td>
-                {userItems?.find((user) => user.id === co.checkedOutBy)?.name}
-              </Td>
+              <Td>{userMap.get(co.checkedOutBy)?.name}</Td>
             </Tr>
           ))}
         </Tbody>
