@@ -95,7 +95,12 @@ async fn bootstrap() -> Result<()> {
         std::env::var("FRONTEND_URL").unwrap_or_else(|_| "http://localhost:3000".into());
     let frontend_origin = frontend_url
         .parse::<axum::http::HeaderValue>()
-        .with_context(|| format!("Failed to parse FRONTEND_URL ('{}') as HeaderValue", frontend_url))?;
+        .with_context(|| {
+            format!(
+                "Failed to parse FRONTEND_URL ('{}') as HeaderValue",
+                frontend_url
+            )
+        })?;
 
     let cors = CorsLayer::new()
         // allow `Authorization` and `Content-Type` headers when accessing the resource
