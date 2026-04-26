@@ -91,18 +91,24 @@ async fn bootstrap() -> Result<()> {
     let kv = Arc::new(RedisClient::new(&app_config.redis)?);
     // registryの初期化
     let registry = Arc::new(AppRegistryImpl::new(pool, kv, app_config));
+    let frontend_url =
+        std::env::var("FRONTEND_URL").unwrap_or_else(|_| "http://localhost:3000".into());
+    let frontend_origin = frontend_url
+        .parse::<axum::http::HeaderValue>()
+        .with_context(|| {
+            format!(
+                "Failed to parse FRONTEND_URL ('{}') as HeaderValue",
+                frontend_url
+            )
+        })?;
+
     let cors = CorsLayer::new()
         // allow `Authorization` and `Content-Type` headers when accessing the resource
         .allow_headers([header::AUTHORIZATION, header::CONTENT_TYPE])
         // allow `GET`,`POST`,`PUT`,`DELETE` when accessing the resource
         .allow_methods([Method::GET, Method::POST, Method::PUT, Method::DELETE])
         // allow requests from the specified origin
-        .allow_origin(
-            std::env::var("FRONTEND_URL")
-                .unwrap_or_else(|_| "http://localhost:3000".into())
-                .parse::<axum::http::HeaderValue>()
-                .unwrap(),
-        );
+        .allow_origin(frontend_origin);
 
     let router = Router::new().merge(v1::routes()).merge(auth::routes());
     // デバッグビルドの時は, ReDocによるAPIドキュメント出力を有効にする
