@@ -21,6 +21,9 @@ impl AppConfig {
         };
         let auth = AuthConfig {
             ttl: std::env::var("AUTH_TOKEN_TTL")?.parse::<u64>()?,
+            bcrypt_cost: std::env::var("BCRYPT_COST")
+                .map(|v| v.parse().unwrap_or(bcrypt::DEFAULT_COST))
+                .unwrap_or(bcrypt::DEFAULT_COST),
         };
         Ok(Self {
             database,
@@ -45,4 +48,5 @@ pub struct RedisConfig {
 
 pub struct AuthConfig {
     pub ttl: u64,
+    pub bcrypt_cost: u32,
 }

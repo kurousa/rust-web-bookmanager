@@ -39,7 +39,10 @@ impl AppRegistryImpl {
             redis_client.clone(),
             app_config.auth.ttl,
         ));
-        let user_repository = Arc::new(UserRepositoryImpl::new(pool.clone()));
+        let user_repository = Arc::new(UserRepositoryImpl::new(
+            pool.clone(),
+            app_config.auth.bcrypt_cost,
+        ));
         let check_out_repository = Arc::new(CheckoutRepositoryImpl::new(pool.clone()));
         Self {
             health_check_repository,

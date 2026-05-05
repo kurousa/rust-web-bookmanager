@@ -16,6 +16,7 @@ use crate::database::{model::user::UserRow, ConnectionPool};
 #[derive(new)]
 pub struct UserRepositoryImpl {
     db: ConnectionPool,
+    bcrypt_cost: u32,
 }
 #[async_trait]
 impl UserRepository for UserRepositoryImpl {
@@ -79,7 +80,7 @@ impl UserRepository for UserRepositoryImpl {
 
     async fn create(&self, event: CreateUser) -> AppResult<User> {
         let user_id = UserId::new();
-        let hashed_password = hash_password(&event.password).await?;
+        let hashed_password = self.hash_password(&event.password).await?;
         let role = Role::User;
 
         let res = sqlx::query!(
@@ -130,7 +131,7 @@ impl UserRepository for UserRepositoryImpl {
         verify_password(&event.current_password, &original_password_hash).await?;
 
         // 新しいパスワードのハッシュ値で更新
-        let new_password_hash = hash_password(&event.new_password).await?;
+        let new_password_hash = self.hash_password(&event.new_password).await?;
         sqlx::query!(
             r#"
                 UPDATE users SET password_hash = $2 WHERE user_id = $1;
@@ -189,13 +190,16 @@ impl UserRepository for UserRepositoryImpl {
     }
 }
 
-async fn hash_password(password: &str) -> AppResult<String> {
-    let password = password.to_string();
-    tokio::task::spawn_blocking(move || {
-        bcrypt::hash(password, bcrypt::DEFAULT_COST).map_err(AppError::from)
-    })
-    .await
-    .map_err(|e| AppError::InternalError(e.into()))?
+impl UserRepositoryImpl {
+    async fn hash_password(&self, password: &str) -> AppResult<String> {
+        let password = password.to_string();
+        let bcrypt_cost = self.bcrypt_cost;
+        tokio::task::spawn_blocking(move || {
+            bcrypt::hash(password, bcrypt_cost).map_err(AppError::from)
+        })
+        .await
+        .map_err(|e| AppError::InternalError(e.into()))?
+    }
 }
 
 async fn verify_password(password: &str, hash: &str) -> AppResult<()> {
@@ -209,4 +213,22 @@ async fn verify_password(password: &str, hash: &str) -> AppResult<()> {
         return Err(AppError::UnauthenticatedError);
     }
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::database::ConnectionPool;
+
+    #[tokio::test]
+    async fn test_hash_password_with_custom_cost() {
+        let repo = UserRepositoryImpl {
+            db: ConnectionPool::new(sqlx::PgPool::connect_lazy("postgres://localhost/db").unwrap()),
+            bcrypt_cost: 4,
+        };
+        let password = "password";
+        let hashed = repo.hash_password(password).await.unwrap();
+        let cost = bcrypt::get_cost(&hashed).unwrap();
+        assert_eq!(cost, 4);
+    }
 }
