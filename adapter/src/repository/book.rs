@@ -13,7 +13,9 @@ use kernel::{
 };
 use shared::error::{AppError, AppResult};
 
-use crate::database::model::book::{BookCheckoutRow, BookRow, PaginatedBookRow};
+use crate::database::model::book::{
+    BookCheckoutRow, BookRow, PaginatedBookDetailRow, PaginatedBookRow,
+};
 use crate::database::ConnectionPool;
 use std::collections::HashMap;
 
@@ -82,14 +84,21 @@ impl BookRepository for BookRepositoryImpl {
     async fn find_all(&self, options: BookListOptions) -> AppResult<PaginatedList<Book>> {
         let BookListOptions { limit, offset } = options;
 
-        let rows: Vec<PaginatedBookRow> = sqlx::query_as!(
-            PaginatedBookRow,
+        let rows: Vec<PaginatedBookDetailRow> = sqlx::query_as!(
+            PaginatedBookDetailRow,
             r#"
                 SELECT
                     COUNT(*) OVER() AS "total!",
-                    b.book_id AS id
+                    b.book_id AS book_id,
+                    b.title AS title,
+                    b.author AS author,
+                    b.isbn AS isbn,
+                    b.description AS description,
+                    u.user_id AS owned_by,
+                    u.name AS owner_name
                 FROM books AS b
-                ORDER BY created_at DESC
+                INNER JOIN users AS u USING(user_id)
+                ORDER BY b.created_at DESC
                 LIMIT $1
                 OFFSET $2
             "#,
@@ -101,29 +110,7 @@ impl BookRepository for BookRepositoryImpl {
         .map_err(AppError::DatabaseOperationError)?;
 
         let total = rows.first().map(|r| r.total).unwrap_or_default();
-        let book_ids = rows.into_iter().map(|r| r.id).collect::<Vec<BookId>>();
-
-        let rows: Vec<BookRow> = sqlx::query_as!(
-            BookRow,
-            r#"
-                SELECT
-                    b.book_id AS book_id,
-                    b.title AS title,
-                    b.author AS author,
-                    b.isbn AS isbn,
-                    b.description AS description,
-                    u.user_id AS owned_by,
-                    u.name AS owner_name
-                FROM books AS b
-                INNER JOIN users AS u USING(user_id)
-                WHERE b.book_id IN (SELECT * FROM UNNEST($1::uuid[]))
-                ORDER BY b.created_at DESC
-            "#,
-            &book_ids as _
-        )
-        .fetch_all(self.db.inner_ref())
-        .await
-        .map_err(AppError::DatabaseOperationError)?;
+        let book_ids: Vec<BookId> = rows.iter().map(|r| r.book_id).collect();
 
         let mut checkouts = self.find_checkouts(&book_ids).await?;
         let items = rows
