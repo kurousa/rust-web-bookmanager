@@ -26,10 +26,9 @@ mod tests {
         let create_token = CreateToken::new(user_id);
 
         assert_eq!(create_token.user_id, user_id);
-        assert!(!create_token.access_token.is_empty());
-        // access_token should be a simple UUID (32 hex characters)
+        let parsed_token = Uuid::parse_str(&create_token.access_token).expect("access_token should be a valid UUID");
         assert_eq!(create_token.access_token.len(), 32);
-        assert!(create_token.access_token.chars().all(|c| c.is_ascii_hexdigit()));
+        assert_eq!(parsed_token.get_version(), Some(uuid::Version::Random));
     }
 
     #[test]
