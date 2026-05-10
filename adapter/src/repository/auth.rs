@@ -51,11 +51,7 @@ impl AuthRepository for AuthRepositoryImpl {
         .await
         .map_err(AppError::DatabaseOperationError)?;
 
-        let password = password.to_string();
-        let hash = user_item.password_hash;
-        let valid = tokio::task::spawn_blocking(move || bcrypt::verify(password, &hash))
-            .await
-            .map_err(|e| AppError::InternalError(e.into()))??;
+        let valid = bcrypt::verify(password, &user_item.password_hash)?;
 
         if !valid {
             return Err(AppError::UnauthenticatedError);

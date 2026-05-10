@@ -10,7 +10,6 @@ use crate::model::{
     list::PaginatedList,
 };
 
-#[mockall::automock]
 #[async_trait]
 pub trait BookRepository: Send + Sync {
     /// 蔵書レコード作成

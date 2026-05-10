@@ -18,7 +18,7 @@ pub struct AuthorizedUserId(UserId);
 
 pub fn from(event: CreateToken) -> (AuthorizationKey, AuthorizedUserId) {
     (
-        AuthorizationKey(event.access_token.0),
+        AuthorizationKey(event.access_token),
         AuthorizedUserId(event.user_id),
     )
 }

@@ -1,21 +1,8 @@
 import useSWR from "swr";
 import useLocalStorageState from "use-local-storage-state";
 import { ACCESS_TOKEN_KEY } from "../_components/auth";
-import { fetchWithToken, post } from "../_lib/client";
+import { fetchWithToken } from "../_lib/client";
 import { User, Users } from "../_types/user";
-import { useRouter } from "next/navigation";
-
-export const useLogout = () => {
-  const [accessToken] = useLocalStorageState(ACCESS_TOKEN_KEY);
-  const router = useRouter();
-
-  const logout = async () => {
-    await post({ destination: "/auth/logout", token: accessToken });
-    router.push("/login");
-  };
-
-  return { logout };
-};
 
 export const useCurrentUser = () => {
   const [accessToken] = useLocalStorageState(ACCESS_TOKEN_KEY);

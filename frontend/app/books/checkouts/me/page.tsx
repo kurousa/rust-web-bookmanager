@@ -4,16 +4,14 @@ import BookTable from "@/app/_components/BookTable";
 import Header from "@/app/_components/Header";
 import ReturnButton from "@/app/_components/ReturnButton";
 import { useMyCheckouts } from "@/app/_contexts/checkout";
-import { useLogout } from "@/app/_contexts/user";
 import { Box, Container, Heading, Text } from "@chakra-ui/react";
 
 export default function CheckedOutBookList() {
   const { checkouts } = useMyCheckouts();
-  const { logout } = useLogout();
 
   return (
     <>
-      <Header onClickLogout={logout}></Header>
+      <Header></Header>
       <Container maxW="container.xl" my={20}>
         <Heading as="h2" size="2xl" mb={10}>
           借りている蔵書

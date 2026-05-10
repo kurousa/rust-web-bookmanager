@@ -2,7 +2,6 @@
 
 import { ACCESS_TOKEN_KEY } from "@/app/_components/auth";
 import Header from "@/app/_components/Header";
-import { useLogout } from "@/app/_contexts/user";
 import { post } from "@/app/_lib/client";
 import {
   Button,
@@ -28,7 +27,6 @@ type BookInput = {
 export default function CreateBook() {
   const [accessToken] = useLocalStorageState(ACCESS_TOKEN_KEY);
   const router = useRouter();
-  const { logout } = useLogout();
 
   const {
     handleSubmit,
@@ -50,7 +48,7 @@ export default function CreateBook() {
 
   return (
     <>
-      <Header onClickLogout={logout}></Header>
+      <Header></Header>
       <Container maxW="container.xl" my={20}>
         <Heading as="h2" size="2xl" mb={2}>
           新しい蔵書を登録する

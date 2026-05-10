@@ -27,7 +27,6 @@ import { useRef } from "react";
 import useLocalStorageState from "use-local-storage-state";
 import NextLink from "next/link";
 import { useBook } from "@/app/_contexts/book";
-import { useLogout } from "@/app/_contexts/user";
 import { del } from "@/app/_lib/client";
 import CheckoutButton from "@/app/_components/CheckoutButton";
 import CheckoutHistory from "@/app/_components/CheckoutHistory";
@@ -35,7 +34,6 @@ import CheckoutHistory from "@/app/_components/CheckoutHistory";
 export default function Page({ params }: Readonly<{ params: { id: string } }>) {
   const [accessToken] = useLocalStorageState(ACCESS_TOKEN_KEY);
   const router = useRouter();
-  const { logout } = useLogout();
   const {
     isOpen: isOpenDelete,
     onOpen: onOpenDelete,
@@ -58,7 +56,7 @@ export default function Page({ params }: Readonly<{ params: { id: string } }>) {
 
   return (
     <>
-      <Header onClickLogout={logout} />
+      <Header />
       <Container maxW="container.xl" my={20}>
         <Heading as="h2" size="2xl" mb={4} noOfLines={1}>
           書籍情報 : {book?.title}

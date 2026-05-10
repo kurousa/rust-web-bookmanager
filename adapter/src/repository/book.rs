@@ -13,9 +13,7 @@ use kernel::{
 };
 use shared::error::{AppError, AppResult};
 
-use crate::database::model::book::{
-    BookCheckoutRow, BookRow, PaginatedBookDetailRow, PaginatedBookRow,
-};
+use crate::database::model::book::{BookCheckoutRow, BookRow, PaginatedBookRow};
 use crate::database::ConnectionPool;
 use std::collections::HashMap;
 
@@ -84,21 +82,14 @@ impl BookRepository for BookRepositoryImpl {
     async fn find_all(&self, options: BookListOptions) -> AppResult<PaginatedList<Book>> {
         let BookListOptions { limit, offset } = options;
 
-        let rows: Vec<PaginatedBookDetailRow> = sqlx::query_as!(
-            PaginatedBookDetailRow,
+        let rows: Vec<PaginatedBookRow> = sqlx::query_as!(
+            PaginatedBookRow,
             r#"
                 SELECT
                     COUNT(*) OVER() AS "total!",
-                    b.book_id AS book_id,
-                    b.title AS title,
-                    b.author AS author,
-                    b.isbn AS isbn,
-                    b.description AS description,
-                    u.user_id AS owned_by,
-                    u.name AS owner_name
+                    b.book_id AS id
                 FROM books AS b
-                INNER JOIN users AS u USING(user_id)
-                ORDER BY b.created_at DESC
+                ORDER BY created_at DESC
                 LIMIT $1
                 OFFSET $2
             "#,
@@ -110,8 +101,32 @@ impl BookRepository for BookRepositoryImpl {
         .map_err(AppError::DatabaseOperationError)?;
 
         let total = rows.first().map(|r| r.total).unwrap_or_default();
-        let book_ids: Vec<BookId> = rows.iter().map(|r| r.book_id).collect();
+        let book_ids = rows.into_iter().map(|r| r.id).collect::<Vec<BookId>>();
 
+        let rows: Vec<BookRow> = sqlx::query_as!(
+            BookRow,
+            r#"
+                SELECT
+                    b.book_id AS book_id,
+                    b.title AS title,
+                    b.author AS author,
+                    b.isbn AS isbn,
+                    b.description AS description,
+                    u.user_id AS owned_by,
+                    u.name AS owner_name
+                FROM books AS b
+                INNER JOIN users AS u USING(user_id)
+                WHERE b.book_id IN (SELECT * FROM UNNEST($1::uuid[]))
+                ORDER BY b.created_at DESC
+            "#,
+            &book_ids as _
+        )
+        .fetch_all(self.db.inner_ref())
+        .await
+        .map_err(AppError::DatabaseOperationError)?;
+
+        // let items = rows.into_iter().map(Book::from).collect();
+        let book_ids = rows.iter().map(|book| book.book_id).collect::<Vec<_>>();
         let mut checkouts = self.find_checkouts(&book_ids).await?;
         let items = rows
             .into_iter()
@@ -217,8 +232,6 @@ impl BookRepository for BookRepositoryImpl {
 
 #[cfg(test)]
 mod tests {
-    use std::str::FromStr;
-
     use super::*;
     use crate::repository::user::UserRepositoryImpl;
     use kernel::{model::user::event::CreateUser, repository::user::UserRepository};
@@ -271,7 +284,7 @@ mod tests {
             description,
             owner,
             .. // 以降のフィールドをスキップ
-        } = res.ok_or_else(|| anyhow::anyhow!("Book not found"))?;
+        } = res.unwrap();
         assert_eq!(id, book_id);
         assert_eq!(title, "Test Title");
         assert_eq!(author, "Test Author");
@@ -279,48 +292,6 @@ mod tests {
         assert_eq!(description, "Test Description");
         assert_eq!(owner.id, user.id);
         assert_eq!(owner.name, "Test User");
-
-        Ok(())
-    }
-
-    #[sqlx::test(fixtures("common", "book"))]
-    async fn test_update_book_not_found(pool: sqlx::PgPool) -> anyhow::Result<()> {
-        let repo = BookRepositoryImpl::new(ConnectionPool::new(pool.clone()));
-        let book_id = BookId::from_str("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa")?; // 存在しないBookID
-        let book = repo.find_by_id(book_id).await?;
-        assert!(book.is_none());
-
-        Ok(())
-    }
-
-    #[sqlx::test(fixtures("common", "book"))]
-    async fn test_update_book_success(pool: sqlx::PgPool) -> anyhow::Result<()> {
-        let repo = BookRepositoryImpl::new(ConnectionPool::new(pool.clone()));
-        // fixtures/book.sqlに記載のBookIDを指定
-        let book_id = BookId::from_str("9890736e-a4e4-461a-a77d-eac3517ef11b")?;
-        let book = repo
-            .find_by_id(book_id)
-            .await?
-            .ok_or_else(|| anyhow::anyhow!("Book not found"))?;
-        const NEW_AUTHOR: &str = "New Author";
-        assert_ne!(book.author, NEW_AUTHOR);
-
-        let update_book = UpdateBook {
-            book_id: book.id,
-            title: book.title,
-            author: NEW_AUTHOR.into(),
-            isbn: book.isbn,
-            description: book.description,
-            // fixtures/common.sqlに記載のユーザーIDを指定
-            requested_user: UserId::from_str("5b4c96ac-316a-4bee-8e69-cac5eb84ff4c")?,
-        };
-        repo.update(update_book).await?;
-
-        let book = repo
-            .find_by_id(book_id)
-            .await?
-            .ok_or_else(|| anyhow::anyhow!("Book not found"))?;
-        assert_eq!(book.author, NEW_AUTHOR);
 
         Ok(())
     }

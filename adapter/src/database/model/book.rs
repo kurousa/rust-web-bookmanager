@@ -44,44 +44,6 @@ pub struct PaginatedBookRow {
     pub total: i64,
     pub id: BookId,
 }
-
-pub struct PaginatedBookDetailRow {
-    pub total: i64,
-    pub book_id: BookId,
-    pub title: String,
-    pub author: String,
-    pub isbn: String,
-    pub description: String,
-    pub owned_by: UserId,
-    pub owner_name: String,
-}
-
-impl PaginatedBookDetailRow {
-    pub fn into_book(self, checkout: Option<CheckoutInfo>) -> Book {
-        let PaginatedBookDetailRow {
-            book_id,
-            title,
-            author,
-            isbn,
-            description,
-            owned_by,
-            owner_name,
-            ..
-        } = self;
-        Book {
-            id: book_id,
-            title,
-            author,
-            isbn,
-            description,
-            owner: BookOwner {
-                id: owned_by,
-                name: owner_name,
-            },
-            checkout_info: checkout,
-        }
-    }
-}
 ///貸出し情報を含めた本のレコード型定義
 pub struct BookCheckoutRow {
     pub checkout_id: CheckoutId,

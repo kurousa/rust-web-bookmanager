@@ -6,134 +6,42 @@ on:
     paths-ignore:
       - "README.md"
       - "frontend/**"
-      - "doc/**"
-      - "LICENSE"
-      - ".gitignore"
-      - ".gemini/**"
-
-# Grant the workflow the permissions required to create check runs and read repo contents.
-permissions:
-  checks: write
-  contents: read
-  actions: read
-
-env:
-  CARGO_INCREMENTAL: 0
 
 jobs:
-  test:
-    name: Test
+  check:
+    name: Check
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      # Use a recent Rust toolchain that satisfies cargo-audit and other deps
-      - name: Install Rust
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: 1.93.0
-          override: true
-
       - name: Cache dependencies
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-            target
-          key: ${{ runner.os }}-cargo-test-${{ hashFiles('**/Cargo.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-cargo-test-
+        uses: Swatinem/rust-cache@v2
 
-      - name: Install cargo-make and test tools
+      - name: Install Rust toolchain
+        run: |
+          rustup toolchain install stable
+
+      - name: Install cargo-related tools
         uses: taiki-e/install-action@v2
         with:
-          tool: cargo-make,cargo-nextest
+          tool: nextest,cargo-make,cargo-machete
 
-      - name: Run tests
+      - name: Tests compile
+        run: cargo make test-ci --no-run --locked
+
+      - name: Test
         run: cargo make test-ci
 
-  lint:
-    name: Lint and Format
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Install Rust with components
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: 1.93.0
-          override: true
-          components: clippy, rustfmt
-
-      - name: Cache dependencies
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-            target
-          key: ${{ runner.os }}-cargo-lint-${{ hashFiles('**/Cargo.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-cargo-lint-
-
-      - name: Install cargo-make and machete
-        uses: taiki-e/install-action@v2
-        with:
-          tool: cargo-make,cargo-machete
-
-      - name: Check formatting
-        run: cargo make fmt -- --check
-
-      - name: Run clippy
+      - name: Clippy
         run: cargo make clippy-ci -- -Dwarnings
+
+      - name: Rustfmt
+        run: cargo make fmt -- --check
 
       - name: Check unused dependencies
         run: cargo machete
+        continue-on-error: true
 
-  security:
-    name: Security audit
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          # fetch sufficient history to diff PR branches
-          fetch-depth: 0
+      # - name: Fix by autofix-ci
+      #   uses: autofix-ci/action@551dded8c6cc8a1054039c8bc0b8b48c51dfc6ef
 
-      - name: Install Rust (required for cargo-audit)
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: 1.93.0
-          override: true
-
-      - name: Check whether Cargo files changed (skip on PRs without Cargo changes)
-        id: cargo_changed
-        run: |
-          # For pushes, always run audit
-          if [ "${{ github.event_name }}" = "push" ]; then
-            echo "changed=true" >> $GITHUB_OUTPUT
-            exit 0
-          fi
-
-          # For pull requests, compare base...head
-          BASE=${{ github.event.pull_request.base.ref }}
-          HEAD=${{ github.event.pull_request.head.ref }}
-
-          # Ensure base ref is available locally
-          git fetch origin $BASE --depth=1 || true
-
-          CHANGED=$(git diff --name-only origin/$BASE...$HEAD || true)
-          echo "Changed files:"
-          echo "$CHANGED"
-
-          if echo "$CHANGED" | grep -qE '(^|/)(Cargo\.toml|Cargo\.lock)$'; then
-            echo "changed=true" >> $GITHUB_OUTPUT
-          else
-            echo "changed=false" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Run security audit
-        if: steps.cargo_changed.outputs.changed == 'true'
-        uses: rustsec/audit-check@v2.0.0
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}

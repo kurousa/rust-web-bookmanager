@@ -1,4 +1,4 @@
-FROM rust:slim-trixie AS builder
+FROM rust:1.84-slim-bookworm AS builder
 
 WORKDIR /app
 
@@ -19,15 +19,15 @@ COPY . .
 RUN cargo build --release
 
 # 最終ステージには小さなベースイメージを使用
-FROM debian:trixie-slim
+FROM debian:bookworm-slim
 WORKDIR /app
+
+RUN adduser book && chown -R book /app
+USER book
 
 # ビルダー段階からビルドされたアプリケーションをコピー
 ARG APP_NAME=app
 COPY --from=builder /app/target/release/${APP_NAME} /app/${APP_NAME}
-
-RUN useradd -m -s /bin/sh book && chown -R book:book /app
-USER book
 
 # 環境変数を設定
 ARG DATABASE_URL
