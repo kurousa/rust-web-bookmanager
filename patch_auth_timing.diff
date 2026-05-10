@@ -1,0 +1,40 @@
+--- adapter/src/repository/auth.rs
++++ adapter/src/repository/auth.rs
+@@ -48,15 +48,22 @@
+         )
+         .fetch_optional(self.db.inner_ref())
+         .await
+-        .map_err(AppError::DatabaseOperationError)?
+-        .ok_or(AppError::UnauthenticatedError)?;
++        .map_err(AppError::DatabaseOperationError)?;
+
+         let password = password.to_string();
+-        let hash = user_item.password_hash;
+-        let valid = tokio::task::spawn_blocking(move || bcrypt::verify(password, &hash))
+-            .await
+-            .map_err(|e| AppError::InternalError(e.into()))??;
+-
+-        if !valid {
+-            return Err(AppError::UnauthenticatedError);
+-        }
+-
+-        Ok(user_item.user_id)
++
++        match user_item {
++            Some(item) => {
++                let hash = item.password_hash;
++                let valid = tokio::task::spawn_blocking(move || bcrypt::verify(password, &hash))
++                    .await
++                    .map_err(|e| AppError::InternalError(e.into()))??;
++                if !valid {
++                    return Err(AppError::UnauthenticatedError);
++                }
++                Ok(item.user_id)
++            }
++            None => {
++                let hash = bcrypt::hash("", bcrypt::DEFAULT_COST).unwrap();
++                let _ = tokio::task::spawn_blocking(move || bcrypt::verify(password, &hash)).await;
++                Err(AppError::UnauthenticatedError)
++            }
++        }
+     }
