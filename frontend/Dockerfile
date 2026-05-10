@@ -24,6 +24,8 @@ COPY ./app ./app
 COPY ./public ./public
 
 # Next.jsのビルド実行 (standaloneモードが有効であることを前提)
+ARG NEXT_PUBLIC_ACCESS_TOKEN_KEY=dummy
+ENV NEXT_PUBLIC_ACCESS_TOKEN_KEY=$NEXT_PUBLIC_ACCESS_TOKEN_KEY
 RUN npm run build
 
 # --- ステージ3: 実行用（Runner） ---

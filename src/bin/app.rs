@@ -16,6 +16,7 @@ use shared::config::AppConfig;
 use tokio::net::TcpListener;
 use tower_http::{
     cors::CorsLayer,
+    set_header::SetResponseHeaderLayer,
     trace::{DefaultMakeSpan, DefaultOnRequest, DefaultOnResponse, TraceLayer},
     LatencyUnit,
 };
@@ -118,6 +119,22 @@ async fn bootstrap() -> Result<()> {
     // ルーターの初期化、AppRegistryをRouterに登録
     let app = router
         .layer(cors)
+        .layer(SetResponseHeaderLayer::if_not_present(
+            axum::http::header::STRICT_TRANSPORT_SECURITY,
+            axum::http::HeaderValue::from_static("max-age=31536000; includeSubDomains; preload"),
+        ))
+        .layer(SetResponseHeaderLayer::if_not_present(
+            axum::http::header::CONTENT_SECURITY_POLICY,
+            axum::http::HeaderValue::from_static("default-src 'self'; frame-ancestors 'none'; object-src 'none'; upgrade-insecure-requests;"),
+        ))
+        .layer(SetResponseHeaderLayer::if_not_present(
+            axum::http::header::X_CONTENT_TYPE_OPTIONS,
+            axum::http::HeaderValue::from_static("nosniff"),
+        ))
+        .layer(SetResponseHeaderLayer::if_not_present(
+            axum::http::header::X_FRAME_OPTIONS,
+            axum::http::HeaderValue::from_static("DENY"),
+        ))
         .layer(
             TraceLayer::new_for_http()
                 .make_span_with(DefaultMakeSpan::new().level(Level::INFO))
