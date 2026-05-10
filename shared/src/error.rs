@@ -64,3 +64,83 @@ impl IntoResponse for AppError {
 
 /// エラーとしてAppError型を扱い可能なResult型
 pub type AppResult<T> = Result<T, AppError>;
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use axum::http::StatusCode;
+    use axum::response::IntoResponse;
+
+    #[test]
+    fn test_app_error_into_response() {
+        let err = AppError::UnprocessableEntity("test".to_string());
+        assert_eq!(
+            err.into_response().status(),
+            StatusCode::UNPROCESSABLE_ENTITY
+        );
+
+        let err = AppError::NotFoundError("test".to_string());
+        assert_eq!(err.into_response().status(), StatusCode::NOT_FOUND);
+
+        let mut report = garde::Report::new();
+        report.append(garde::Path::empty(), garde::Error::new("test error"));
+        let err = AppError::ValidationError(report);
+        assert_eq!(err.into_response().status(), StatusCode::BAD_REQUEST);
+
+        let uuid_err = uuid::Uuid::parse_str("invalid").unwrap_err();
+        let err = AppError::ConvertToUuidError(uuid_err);
+        assert_eq!(err.into_response().status(), StatusCode::BAD_REQUEST);
+
+        let err = AppError::UnauthenticatedError;
+        assert_eq!(err.into_response().status(), StatusCode::FORBIDDEN);
+
+        let err = AppError::ForbiddenError;
+        assert_eq!(err.into_response().status(), StatusCode::FORBIDDEN);
+
+        let err = AppError::UnauthorizedError;
+        assert_eq!(err.into_response().status(), StatusCode::UNAUTHORIZED);
+
+        let err = AppError::TransactionError(sqlx::Error::RowNotFound);
+        assert_eq!(
+            err.into_response().status(),
+            StatusCode::INTERNAL_SERVER_ERROR
+        );
+
+        let err = AppError::DatabaseOperationError(sqlx::Error::RowNotFound);
+        assert_eq!(
+            err.into_response().status(),
+            StatusCode::INTERNAL_SERVER_ERROR
+        );
+
+        let err = AppError::NoRowsAffectedError("test".to_string());
+        assert_eq!(
+            err.into_response().status(),
+            StatusCode::INTERNAL_SERVER_ERROR
+        );
+
+        let redis_err = redis::RedisError::from((redis::ErrorKind::ResponseError, "test"));
+        let err = AppError::KVSError(redis_err);
+        assert_eq!(
+            err.into_response().status(),
+            StatusCode::INTERNAL_SERVER_ERROR
+        );
+
+        let err = AppError::BcryptError(bcrypt::BcryptError::InvalidCost("test".to_string()));
+        assert_eq!(
+            err.into_response().status(),
+            StatusCode::INTERNAL_SERVER_ERROR
+        );
+
+        let err = AppError::ConversionEntityError("test".to_string());
+        assert_eq!(
+            err.into_response().status(),
+            StatusCode::INTERNAL_SERVER_ERROR
+        );
+
+        let err = AppError::InternalError(anyhow::anyhow!("test error"));
+        assert_eq!(
+            err.into_response().status(),
+            StatusCode::INTERNAL_SERVER_ERROR
+        );
+    }
+}
