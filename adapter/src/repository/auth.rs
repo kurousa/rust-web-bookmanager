@@ -47,9 +47,10 @@ impl AuthRepository for AuthRepositoryImpl {
             "#,
             email
         )
-        .fetch_one(self.db.inner_ref())
+        .fetch_optional(self.db.inner_ref())
         .await
-        .map_err(AppError::DatabaseOperationError)?;
+        .map_err(AppError::DatabaseOperationError)?
+        .ok_or(AppError::UnauthenticatedError)?;
 
         let password = password.to_string();
         let hash = user_item.password_hash;
