@@ -70,7 +70,7 @@ utoipa = { version = "4.1.0", features = ["axum_extras","uuid","chrono"]}
 utoipa-redoc = { version = "2.0.0", features = ["axum"]}
 
 [dependencies]
-tower-http = { version = "0.5.0", features = ["cors", "trace"] }
+tower-http = { version = "0.5.0", features = ["cors", "trace", "set-header"] }
 adapter.workspace = true
 api.workspace = true
 registry.workspace = true
