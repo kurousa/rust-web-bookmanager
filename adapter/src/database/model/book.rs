@@ -54,10 +54,33 @@ pub struct PaginatedBookDetailRow {
     pub description: String,
     pub owned_by: UserId,
     pub owner_name: String,
+    pub checkout_id: Option<CheckoutId>,
+    pub checkout_user_id: Option<UserId>,
+    pub checkout_user_name: Option<String>,
+    pub checked_out_at: Option<DateTime<Utc>>,
 }
 
 impl PaginatedBookDetailRow {
-    pub fn into_book(self, checkout: Option<CheckoutInfo>) -> Book {
+    pub fn into_book(self) -> Book {
+        let checkout =
+            if let (Some(checkout_id), Some(user_id), Some(user_name), Some(checked_out_at)) = (
+                self.checkout_id,
+                self.checkout_user_id,
+                self.checkout_user_name,
+                self.checked_out_at,
+            ) {
+                Some(CheckoutInfo {
+                    checkout_id,
+                    checked_out_by: CheckOutUser {
+                        id: user_id,
+                        name: user_name,
+                    },
+                    checked_out_at,
+                })
+            } else {
+                None
+            };
+
         let PaginatedBookDetailRow {
             book_id,
             title,

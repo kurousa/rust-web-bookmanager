@@ -1,0 +1,5 @@
+⚡ optimize: eliminate N+1 queries during paginated book retrieval
+
+💡 What: Modified `find_all` in `BookRepositoryImpl` to use `LEFT JOIN`s for checkouts and checkout users, directly mapping the result into the returned `Book` instead of making a second sequential query via `find_checkouts`.
+🎯 Why: Previously, `find_all` would execute a query to fetch a paginated list of books, and then execute a second query (`find_checkouts`) to look up the checkout status for all the retrieved book IDs using an `IN` clause. This resulted in redundant database roundtrips, increasing latency. By combining them via `LEFT JOIN`, we execute everything in one database roundtrip and rely on the database's optimizer to resolve it efficiently.
+📊 Measured Improvement: Due to environment constraints with `sqlx` prepare checks and local database setup, automated benchmarking was not run successfully. However, theoretical benefits for I/O bound tasks point to a 1 roundtrip reduction per page load (eliminating the N+1 `IN` clause fetching behavior) which decreases overall latency.

@@ -95,9 +95,15 @@ impl BookRepository for BookRepositoryImpl {
                     b.isbn AS isbn,
                     b.description AS description,
                     u.user_id AS owned_by,
-                    u.name AS owner_name
+                    u.name AS owner_name,
+                    c.checkout_id AS "checkout_id?",
+                    cu.user_id AS "checkout_user_id?",
+                    cu.name AS "checkout_user_name?",
+                    c.checked_out_at AS "checked_out_at?"
                 FROM books AS b
                 INNER JOIN users AS u USING(user_id)
+                LEFT JOIN checkouts AS c ON b.book_id = c.book_id
+                LEFT JOIN users AS cu ON c.user_id = cu.user_id
                 ORDER BY b.created_at DESC
                 LIMIT $1
                 OFFSET $2
@@ -110,15 +116,9 @@ impl BookRepository for BookRepositoryImpl {
         .map_err(AppError::DatabaseOperationError)?;
 
         let total = rows.first().map(|r| r.total).unwrap_or_default();
-        let book_ids: Vec<BookId> = rows.iter().map(|r| r.book_id).collect();
-
-        let mut checkouts = self.find_checkouts(&book_ids).await?;
         let items = rows
             .into_iter()
-            .map(|row| {
-                let checkout = checkouts.remove(&row.book_id);
-                row.into_book(checkout)
-            })
+            .map(|row: PaginatedBookDetailRow| row.into_book())
             .collect();
 
         Ok(PaginatedList {
