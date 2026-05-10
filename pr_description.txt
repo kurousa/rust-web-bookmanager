@@ -1,8 +1,0 @@
-🎯 **What:** The testing gap addressed
-Adds missing test for `From<ReturnedCheckoutRow>` for `Checkout`.
-
-📊 **Coverage:** What scenarios are now tested
-Validates correct mapping of fields between the raw database row and the business domain model for a returned checkout.
-
-✨ **Result:** The improvement in test coverage
-Ensures deterministic validation that the conversion works, improving confidence when making future changes to checkout models.
