@@ -2,10 +2,12 @@
 
 ## 動作環境
 
-Windowsで開発を行っています
+Windows / WSL2(Ubuntu)で開発を行っています
 
 - (必須) Docker, Docker Composeが利用可能であること
 - (推奨) cargo makeが利用可能であること
+  - 導入を推奨します。詳しくは、以下を参照してください。
+    <https://github.com/sagiegurari/cargo-make#installation>
 
 ## 使い方
 

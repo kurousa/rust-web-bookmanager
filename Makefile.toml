@@ -57,6 +57,16 @@ run_task = [
 run_task = [
     { name = [
         "compose-up-db",
+        "migrate-with-bash",
+        "compose-up-redis",
+        "compose-up-jaeger",
+    ] },
+]
+
+[tasks.before-build-with-ps]
+run_task = [
+    { name = [
+        "compose-up-db",
         "migrate-with-ps",
         "compose-up-redis",
         "compose-up-jaeger",
