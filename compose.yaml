@@ -7,6 +7,7 @@ services:
       args:
         BACKEND_HOST: ${BACKEND_HOST}
         BACKEND_PORT: ${BACKEND_PORT}
+        NEXT_PUBLIC_ACCESS_TOKEN_KEY: ${NEXT_PUBLIC_ACCESS_TOKEN_KEY}
       network: host
     ports:
       - ${FRONTEND_PORT}:3000
