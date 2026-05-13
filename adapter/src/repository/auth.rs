@@ -47,21 +47,29 @@ impl AuthRepository for AuthRepositoryImpl {
             "#,
             email
         )
-        .fetch_one(self.db.inner_ref())
+        .fetch_optional(self.db.inner_ref())
         .await
         .map_err(AppError::DatabaseOperationError)?;
 
         let password = password.to_string();
-        let hash = user_item.password_hash;
-        let valid = tokio::task::spawn_blocking(move || bcrypt::verify(password, &hash))
-            .await
-            .map_err(|e| AppError::InternalError(e.into()))??;
 
-        if !valid {
-            return Err(AppError::UnauthenticatedError);
+        match user_item {
+            Some(item) => {
+                let hash = item.password_hash;
+                let valid = tokio::task::spawn_blocking(move || bcrypt::verify(password, &hash))
+                    .await
+                    .map_err(|e| AppError::InternalError(e.into()))??;
+                if !valid {
+                    return Err(AppError::UnauthenticatedError);
+                }
+                Ok(item.user_id)
+            }
+            None => {
+                let hash = bcrypt::hash("", bcrypt::DEFAULT_COST).unwrap();
+                let _ = tokio::task::spawn_blocking(move || bcrypt::verify(password, &hash)).await;
+                Err(AppError::UnauthenticatedError)
+            }
         }
-
-        Ok(user_item.user_id)
     }
 
     async fn create_token(&self, event: CreateToken) -> AppResult<AccessToken> {

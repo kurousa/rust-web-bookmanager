@@ -53,3 +53,53 @@ impl FromRequestParts<AppRegistry> for AuthorizedUser {
         Ok(Self { access_token, user })
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use kernel::model::id::UserId;
+
+    #[test]
+    fn test_authorized_user_id() {
+        let user_id = UserId::new();
+        let authorized_user = AuthorizedUser {
+            access_token: AccessToken("test_token".to_string()),
+            user: User {
+                id: user_id,
+                name: "Test User".to_string(),
+                email: "test@example.com".to_string(),
+                role: Role::User,
+            },
+        };
+
+        assert_eq!(authorized_user.id(), user_id);
+    }
+
+    #[test]
+    fn test_authorized_user_is_admin() {
+        let user_id = UserId::new();
+        let admin_user = AuthorizedUser {
+            access_token: AccessToken("test_token".to_string()),
+            user: User {
+                id: user_id,
+                name: "Test Admin".to_string(),
+                email: "admin@example.com".to_string(),
+                role: Role::Admin,
+            },
+        };
+
+        assert!(admin_user.is_admin());
+
+        let regular_user = AuthorizedUser {
+            access_token: AccessToken("test_token".to_string()),
+            user: User {
+                id: user_id,
+                name: "Test User".to_string(),
+                email: "user@example.com".to_string(),
+                role: Role::User,
+            },
+        };
+
+        assert!(!regular_user.is_admin());
+    }
+}

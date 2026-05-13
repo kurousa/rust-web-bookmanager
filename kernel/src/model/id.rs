@@ -65,3 +65,25 @@ macro_rules! define_id {
 define_id!(UserId);
 define_id!(BookId);
 define_id!(CheckoutId);
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::str::FromStr;
+    use uuid::Uuid;
+
+    #[test]
+    fn test_user_id_from_str_success() {
+        let uuid_str = "550e8400-e29b-41d4-a716-446655440000";
+        let user_id = UserId::from_str(uuid_str);
+        assert!(user_id.is_ok());
+        assert_eq!(user_id.unwrap().raw(), Uuid::parse_str(uuid_str).unwrap());
+    }
+
+    #[test]
+    fn test_user_id_from_str_failure() {
+        let invalid_str = "invalid-uuid";
+        let user_id = UserId::from_str(invalid_str);
+        assert!(user_id.is_err());
+    }
+}
