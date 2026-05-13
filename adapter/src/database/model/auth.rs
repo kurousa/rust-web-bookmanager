@@ -14,6 +14,7 @@ pub struct UserItem {
 }
 
 pub struct AuthorizationKey(String);
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct AuthorizedUserId(UserId);
 
 pub fn from(event: CreateToken) -> (AuthorizationKey, AuthorizedUserId) {
@@ -68,5 +69,34 @@ impl TryFrom<String> for AuthorizedUserId {
 impl AuthorizedUserId {
     pub fn into_inner(self) -> UserId {
         self.0
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use uuid::Uuid;
+
+    #[test]
+    fn test_authorized_user_id_try_from_valid_string() {
+        let uuid = Uuid::new_v4();
+        let expected = AuthorizedUserId(UserId::from(uuid));
+
+        let check = |input: String| {
+            let result = AuthorizedUserId::try_from(input);
+            assert_eq!(result.unwrap(), expected);
+        };
+
+        check(uuid.to_string());
+        check(uuid.simple().to_string());
+    }
+    fn test_authorized_user_id_try_from_invalid_string() {
+        let invalid_str = "not-a-uuid".to_string();
+
+        let result = AuthorizedUserId::try_from(invalid_str);
+
+        assert!(result.is_err());
+        let err = result.unwrap_err();
+        assert!(matches!(err, AppError::ConversionEntityError(_)));
     }
 }
