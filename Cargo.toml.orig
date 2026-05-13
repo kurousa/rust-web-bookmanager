@@ -24,7 +24,7 @@ publish = false
 license = "MIT"
 
 [workspace.dependencies]
-serde_json = "1.0.108"
+serde_json = "1.0.105"
 adapter = { path = "./adapter" }
 api = { path = "./api" }
 kernel = { path = "./kernel" }
@@ -38,10 +38,10 @@ uuid = { version = "1.4.0", features = [
     "v4",
     "serde",
 ] }
-chrono = { version = "0.4.31", default-features = false, features = ["serde"] }
-serde = { version = "1.0.193", features = ["derive"] }
+chrono = { version = "0.4.26", default-features = false, features = ["serde"] }
+serde = { version = "1.0.174", features = ["derive"] }
 secrecy = "0.8.0"
-sqlx = { version = "0.7.3", features = [ # Updated to address RUSTSEC-2024-0363
+sqlx = { version = "0.8.1", features = [ # Updated to address RUSTSEC-2024-0363
     "runtime-tokio",
     "uuid",
     "chrono",
