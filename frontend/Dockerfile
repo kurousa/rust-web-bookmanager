@@ -30,7 +30,6 @@ RUN npm run build
 
 # --- ステージ3: 実行用（Runner） ---
 FROM node:$IMAGE_TAG AS runner
-WORKDIR /app
 
 # 環境変数の設定
 ENV NODE_ENV production
@@ -43,18 +42,16 @@ ENV BACKEND_PORT=${BACKEND_PORT}
 ENV FRONTEND_PORT 3000
 ENV PORT $FRONTEND_PORT
 
-# セキュリティ: デフォルトのnodeユーザ（uid:1000）を使用するための設定
-# WORKDIR内の所有権をnodeユーザに変更
-RUN chown node:node /app
+# セキュリティ: デフォルトのnodeユーザ（uid:1000）を使用
+USER node
+
+WORKDIR /app
 
 # ビルド成果物のうち、実行に必要な最小限のファイルのみをコピー
 # standaloneモードでは .next/standalone に必要なnode_modulesも含まれます
 COPY --from=builder --chown=node:node /app/public ./public
 COPY --from=builder --chown=node:node /app/.next/standalone ./
 COPY --from=builder --chown=node:node /app/.next/static ./.next/static
-
-# 実行ユーザを node に切り替え
-USER node
 
 # ポートの公開
 EXPOSE $FRONTEND_PORT
