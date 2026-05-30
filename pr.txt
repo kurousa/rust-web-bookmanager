@@ -1,0 +1,10 @@
+🎯 **What:** Replaced the unhandled `unwrap()` in the `None` branch of `verify_user` with proper error handling, propagating it as an `AppError::InternalError`. The CPU-intensive `bcrypt::hash` call has also been wrapped in `tokio::task::spawn_blocking` to prevent blocking the async runtime, maintaining consistency with existing logic.
+
+💡 **Why:** This improves maintainability by removing a potential panic (unwrap) and ensuring consistent, safe error propagation logic throughout the `verify_user` flow. It also ensures CPU-heavy tasks do not stall the async runtime.
+
+✅ **Verification:**
+- Ran `cargo fmt` to ensure style consistency.
+- The build issue was caused by the offline sandbox missing `.sqlx` metadata, but manual inspection shows the mutation propagates errors using `?` through the outer match statement just like the `Some` branch.
+- Confirmed `AppError::InternalError` correctly maps the task failure and bcrypt error.
+
+✨ **Result:** The `verify_user` function no longer has the risk of panicking in the event that `bcrypt::hash` fails unexpectedly during dummy verification.

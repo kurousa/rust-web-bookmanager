@@ -65,7 +65,9 @@ impl AuthRepository for AuthRepositoryImpl {
                 Ok(item.user_id)
             }
             None => {
-                let hash = bcrypt::hash("", bcrypt::DEFAULT_COST).unwrap();
+                let hash = tokio::task::spawn_blocking(|| bcrypt::hash("", bcrypt::DEFAULT_COST))
+                    .await
+                    .map_err(|e| AppError::InternalError(e.into()))??;
                 let _ = tokio::task::spawn_blocking(move || bcrypt::verify(password, &hash)).await;
                 Err(AppError::UnauthenticatedError)
             }
