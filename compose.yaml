@@ -1,18 +1,5 @@
 services:
-
-  frontend:
-    build:
-      context: frontend
-      dockerfile: Dockerfile
-      args:
-        BACKEND_HOST: ${BACKEND_HOST}
-        BACKEND_PORT: ${BACKEND_PORT}
-        NEXT_PUBLIC_ACCESS_TOKEN_KEY: ${NEXT_PUBLIC_ACCESS_TOKEN_KEY}
-      network: host
-    ports:
-      - ${FRONTEND_PORT}:3000
-
-  backend:
+  app:
     build:
       context: .
       dockerfile: Dockerfile
@@ -37,7 +24,6 @@ services:
     depends_on:
       - redis
       - postgres
-      - jaeger
 
   redis:
     image: redis:alpine
@@ -46,19 +32,11 @@ services:
 
   postgres:
     image: postgres:15
-    # log_destination=stderr ログを標準エラー出力に集約し、
-    # log_statement=all 実行される全てのSQLステートメントをログに記録する
-    # log_connections=on log_disconnections=on データベースへの全ての接続と切断も記録する
-    command: >
-      postgres
-      -c log_destination=stderr
-      -c log_statement=all
-      -c log_connections=on
-      -c log_disconnections=on
+    command: postgres -c log_destination=stderr -c log_statement=all -c log_connections=on -c log_disconnections=on
     ports:
-      - 5432:5432
+      - ${DATABASE_PORT_OUTER}:${DATABASE_PORT_INNER}
     volumes:
-      - db:/var/lib/postgresql/data
+      - db:/var/lib/postgres/data
     environment:
       POSTGRES_USER: ${DATABASE_USERNAME}
       POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
@@ -69,16 +47,6 @@ services:
       timeout: 30s
       retries: 5
       start_period: 30s
-
-  jaeger:
-    image: jaegertracing/all-in-one:${JAEGER_VERSION:-latest}
-    ports:
-      - "16686:16686" # Jaeger UI
-      - "14268:14268" # Jaeger collector
-      - "6831:6831/udp" # Jaeger agent (UDP)
-      - "6832:6832/udp" # Jaeger agent (UDP)
-    environment:
-      - LOG_LEVEL=${JAEGER_LOG_LEVEL:-debug}
 
 volumes:
   db:
