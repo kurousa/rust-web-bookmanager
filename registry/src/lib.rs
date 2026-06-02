@@ -36,11 +36,11 @@ impl AppRegistryImpl {
         let book_repository = Arc::new(BookRepositoryImpl::new(pool.clone()));
         let auth_repository = Arc::new(AuthRepositoryImpl::new(
             pool.clone(),
-            redis_client.clone(),
+            redis_client,
             app_config.auth.ttl,
         ));
         let user_repository = Arc::new(UserRepositoryImpl::new(pool.clone()));
-        let check_out_repository = Arc::new(CheckoutRepositoryImpl::new(pool.clone()));
+        let check_out_repository = Arc::new(CheckoutRepositoryImpl::new(pool));
         Self {
             health_check_repository,
             book_repository,
