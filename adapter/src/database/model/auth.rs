@@ -90,6 +90,8 @@ mod tests {
         check(uuid.to_string());
         check(uuid.simple().to_string());
     }
+
+    #[test]
     fn test_authorized_user_id_try_from_invalid_string() {
         let invalid_str = "not-a-uuid".to_string();
 

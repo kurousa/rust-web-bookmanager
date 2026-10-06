@@ -64,7 +64,7 @@ async fn show_book_list_with_query_200(
     let app: axum::Router = make_router(fixture);
 
     // リクエストを作成・送信し、レスポンスのステータスコードを検証
-    let req = Request::get(&v1(path)).bearer().body(Body::empty())?;
+    let req = Request::get(v1(path)).bearer().body(Body::empty())?;
     let resp = app.oneshot(req).await?;
     assert_eq!(resp.status(), axum::http::StatusCode::OK);
 
@@ -89,7 +89,7 @@ async fn delete_book_204(mut fixture: registry::MockAppRegistryExt) -> anyhow::R
 
     let app = make_router(fixture);
 
-    let req = Request::delete(&v1(&format!("/books/{}", book_id)))
+    let req = Request::delete(v1(&format!("/books/{}", book_id)))
         .bearer()
         .body(Body::empty())?;
     let resp = app.oneshot(req).await?;
@@ -113,7 +113,7 @@ async fn delete_book_404(mut fixture: registry::MockAppRegistryExt) -> anyhow::R
 
     let app = make_router(fixture);
 
-    let req = Request::delete(&v1(&format!("/books/{}", book_id)))
+    let req = Request::delete(v1(&format!("/books/{}", book_id)))
         .bearer()
         .body(Body::empty())?;
     let resp = app.oneshot(req).await?;
@@ -139,7 +139,7 @@ async fn update_book_400(
     let app: axum::Router = make_router(fixture);
 
     // Create and send the request, then verify the response status code
-    let req = Request::put(&v1(&format!("/books/{}", book_id)))
+    let req = Request::put(v1(&format!("/books/{}", book_id)))
         .header("Content-Type", "application/json")
         .bearer()
         .body(Body::from(body.to_owned()))?;
@@ -191,7 +191,7 @@ async fn show_book_list_with_query_400(
     let app: axum::Router = make_router(fixture);
 
     // リクエストを作成・送信し、レスポンスのステータスコードを検証
-    let req = Request::get(&v1(path)).bearer().body(Body::empty())?;
+    let req = Request::get(v1(path)).bearer().body(Body::empty())?;
     let resp = app.oneshot(req).await?;
     assert_eq!(resp.status(), axum::http::StatusCode::BAD_REQUEST);
 
