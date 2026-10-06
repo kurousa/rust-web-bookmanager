@@ -14,7 +14,7 @@ async fn health_check_api_200(
     fixture_registry: registry::MockAppRegistryExt,
 ) -> anyhow::Result<()> {
     let app = make_router(fixture_registry);
-    let req = Request::get(&v1("/health")).body(Body::empty())?;
+    let req = Request::get(v1("/health")).body(Body::empty())?;
     let resp = app.oneshot(req).await?;
 
     assert_eq!(resp.status(), StatusCode::OK);
@@ -39,7 +39,7 @@ async fn health_check_db(
         });
 
     let app = make_router(fixture_registry);
-    let req = Request::get(&v1("/health/db")).body(Body::empty())?;
+    let req = Request::get(v1("/health/db")).body(Body::empty())?;
     let resp = app.oneshot(req).await?;
 
     assert_eq!(resp.status(), expected_status);

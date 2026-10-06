@@ -13,9 +13,7 @@ use kernel::{
 };
 use shared::error::{AppError, AppResult};
 
-use crate::database::model::book::{
-    BookCheckoutRow, BookRow, PaginatedBookDetailRow, PaginatedBookRow,
-};
+use crate::database::model::book::{BookCheckoutRow, BookRow, PaginatedBookDetailRow};
 use crate::database::ConnectionPool;
 use std::collections::HashMap;
 
