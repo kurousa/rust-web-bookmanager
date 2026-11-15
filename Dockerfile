@@ -30,7 +30,7 @@ WORKDIR /app
 
 # ビルダー段階からビルドされたアプリケーションをコピー
 ARG APP_NAME=app
-COPY --from=builder --chown=nonroot:nonroot /app/target/x86_64-unknown-linux-musl/release/${APP_NAME} /app/app
+COPY --from=builder --chown=nonroot:nonroot /app/target/x86_64-unknown-linux-musl/release/${APP_NAME} /app
 
 USER nonroot:nonroot
 
@@ -41,4 +41,4 @@ ENV PORT=8080
 EXPOSE ${PORT}
 
 # ENTRYPOINTをexec形式で使用
-ENTRYPOINT ["/app/app"]
+ENTRYPOINT ["/app"]
