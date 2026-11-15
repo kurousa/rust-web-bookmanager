@@ -26,7 +26,6 @@ RUN cargo build --release --target x86_64-unknown-linux-musl
 
 # 最終ステージにはDistroless staticイメージを使用
 FROM gcr.io/distroless/static-debian13:nonroot
-WORKDIR /app
 
 # ビルダー段階からビルドされたアプリケーションをコピー
 ARG APP_NAME=app
